@@ -4,23 +4,24 @@ Instructions.__index = Instructions
 
 function Instructions.new(instructionTable, host)
 	local self = setmetatable({}, Instructions)
-	self.instructionTable = instructionTable
+	self.instructionList = instructionTable
 	self.host = host
 	self.ind = 1
 	self.wait = 0
+	self.mag = 1 -- For multiplying certain actions with a constant
 	return self
 end
 
 function Instructions:printInstructions()
   print("---- INSTRUCTION TABLE ----")
 
-  if not self.instructionTable or #self.instructionTable == 0 then
+  if not self.instructionTable or #self.instructionList == 0 then
     print("(empty)")
     print("---------------------------")
     return
   end
 
-  for i, line in ipairs(self.instructionTable) do
+  for i, line in ipairs(self.instructionList) do
     print(string.format("%3d: %s", i, line))
   end
 
@@ -63,7 +64,7 @@ function Instructions:readInstruction(instruction)
 
 	if parts[1] == "setXSpeed" then 
 		self:commandIntegrity(tonumber(parts[2]))
-		self.host.xSpeed = tonumber(parts[2])
+		self.host.xSpeed = tonumber(parts[2]) * self.mag
 		io.stdout:flush()
 	end
 
@@ -85,7 +86,7 @@ function Instructions:callInstructions(dt)
 	-- Call readInstruction() for every line until receiving false as return
 	local keepReading = true
 	while self.wait <= 0 and keepReading do
-		keepReading = self:readInstruction(self.instructionTable[self.ind])
+		keepReading = self:readInstruction(self.instructionList[self.ind])
     end
 end
 
