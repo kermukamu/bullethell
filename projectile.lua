@@ -7,8 +7,8 @@ function Projectile.new(x, y, r, sx, sy, spr, sprW, sprH, damage, affectEnemy, a
 	self.x = x or 0
 	self.y = y or 0
 	self.r = r or 0
-	self.sx = sx or 1
-	self.sy = sy or 1
+	self.sx = sx or 0.2
+	self.sy = sy or 0.2
 	self.sprite = spr
 	self.w = sprW or 10
 	self.h = sprH or 10

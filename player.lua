@@ -5,7 +5,7 @@ Projectile = cprojectile.Projectile
 local Player = {}
 Player.__index = Player
 
-function Player.new(x, y, r, sx, sy, spr, sprW, sprH)
+function Player.new(x, y, r, sx, sy, spr, sprW, sprH, shotSprite, projectileTable)
 	local self = setmetatable({}, Player)
 	self.x = x or 0
 	self.y = y or 0
@@ -13,6 +13,7 @@ function Player.new(x, y, r, sx, sy, spr, sprW, sprH)
 	self.sx = sx or 1
 	self.sy = sy or 1
 	self.sprite = spr
+	self.shotSprite = shotSprite
 	self.w = sprW or 128
 	self.h = sprH or 128
 	self.health = 100
@@ -23,25 +24,26 @@ function Player.new(x, y, r, sx, sy, spr, sprW, sprH)
 	self.ySpeed = 0
 	self.dashSpeed = 0
 	self.drag = 30
-	self.maxMoveSpeed = 500
+	self.maxMoveSpeed = 1000
 	self.maxDashSpeed = 4000
 	self.maxShotCooldown = 0.1
 	self.maxHurtCooldown = 1
 	self.shotDamage = 30
+	self.projectiles = projectileTable
 
 	return self
 end
 
-function Player:update(dt, projectileTable)
+function Player:update(dt)
     self.dashCooldown = math.max(0, self.dashCooldown - dt)
     self.shotCooldown = math.max(0, self.shotCooldown - dt)
     self.hurtCooldown = math.max(0, self.hurtCooldown - dt)
-    self:movement(dt)
+    self:movement()
     self:posUpdate(dt)
 
-    -- Run collision checks
+    -- Run collision checks between projectiles and player
     if self.hurtCooldown <= 0 then
-    	for _, p in ipairs(projectileTable) do
+    	for _, p in ipairs(self.projectiles) do
 			if p.affectPlayer and p:collidesWith(self) then
 				p.health = p.health - 1
 				self.health = self.health - p.damage
@@ -78,19 +80,17 @@ function Player:dash(direction)
 	end
 end
 
-function Player:shoot(projectileTable, sprite)
+function Player:shoot()
 	if (self.shotCooldown <= 0) then
-		print("Shooting a projectile")
-		io.stdout:flush()
 		self.shotCooldown = self.maxShotCooldown
-		local spriteW = sprite:getWidth()
-		local shot = Projectile.new(self:getXCenter() - (spriteW / 2), self.y - 10, 0, 1, 1, sprite, spriteW, sprite:getHeight(), self.shotDamage, true, false)
+		local spriteW = self.shotSprite:getWidth()
+		local shot = Projectile.new(self:getXCenter() - (spriteW / 2), self.y - 10, 0, 0.6, 0.6, self.shotSprite, spriteW, self.shotSprite:getHeight(), self.shotDamage, true, false)
 		shot.ySpeed = -6000
-		table.insert(projectileTable, shot)
+		table.insert(projectiles, shot)
 	end
 end
 
-function Player:movement(dt)
+function Player:movement()
 	local hor = 0 
 	local vert = 0
 

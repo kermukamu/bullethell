@@ -4,6 +4,8 @@ local cprojectile = require("projectile")
 Projectile = cprojectile.Projectile
 local cenemy = require("enemy")
 Enemy = cenemy.Enemy
+local cinstructions = require("instructions")
+Instructions = cinstructions.Instructions
 
 function love.load()
 	love.window.setTitle("BulletHell")
@@ -17,29 +19,35 @@ function love.load()
 	enemySprite = love.graphics.newImage('sprites/tile2.png')
 	enemyShotSprite = love.graphics.newImage('sprites/enemyShot.png')
 
+	-- Initialize the projectile table
+	projectiles = {}
+
 	-- Initialize player
 	local px = love.graphics.getWidth() / 2
 	local py = love.graphics.getHeight() / 2
-	player = Player.new(px, py, 0, 1, 1, playerSprite, playerSprite:getWidth(), playerSprite:getHeight())
+	player = Player.new(px, py, 0, 0.5, 0.5, playerSprite, playerSprite:getWidth(), playerSprite:getHeight(), playerShotSprite, projectiles)
 
-	-- Initialize the projectile table
-	projectiles = {}
 
 	-- Initialize the enemy table
 	enemies = {}
 
 	stage = {}
-	stage.over = false
+	stage.over = falseas
 
 	-- Add a test enemy
-	local testEnemy1 = Enemy.new(love.graphics.getWidth() / 2 - 300, 200, 0, 1, 1, enemySprite, enemySprite:getWidth(), enemySprite:getHeight())
-	local testEnemy2 = Enemy.new(love.graphics.getWidth() / 2 + 300, 200, 0, 1, 1, enemySprite, enemySprite:getWidth(), enemySprite:getHeight())
+	enemyInstructions = readFile('instructions/enemy1.str.txt')
+	if enemyInstructions then
+		print("Instructions read!\n")
+		io.stdout:flush()
+	end
+	local testEnemy1 = Enemy.new(love.graphics.getWidth() / 2 - 300, 50, 0, 0.8, 0.8, enemySprite, enemySprite:getWidth(), enemySprite:getHeight(), enemyInstructions, enemyShotSprite, projectiles)
+	local testEnemy2 = Enemy.new(love.graphics.getWidth() / 2 + 300, 50, 0, 0.8, 0.8, enemySprite, enemySprite:getWidth(), enemySprite:getHeight(), enemyInstructions, enemyShotSprite, projectiles)
 	table.insert(enemies, testEnemy1)
 	table.insert(enemies, testEnemy2)
 end
 
 function love.update(dt)
-	if (not stage.over) then player:update(dt, projectiles) end
+	if (not stage.over) then player:update(dt) end
 	if love.keyboard.isDown("space") then player:shoot(projectiles, playerShotSprite) end
 
 	-- Update projectiles
@@ -47,8 +55,6 @@ function love.update(dt)
 		local p = projectiles[i]
 		p:update(dt)
 		if p:shouldDestroy() then
-			print("Deleting projectile")
-			io.stdout:flush()
         	table.remove(projectiles, i)
     	end
     end
@@ -56,8 +62,8 @@ function love.update(dt)
     -- Update enemies
 	for i =#enemies, 1, -1 do
 		local e = enemies[i]
-		e:update(dt, projectiles)
-		e:shoot(projectiles, enemyShotSprite)
+		e:update(dt)
+		e:shoot(false)
 		if e:shouldDestroy() then
 			print("Deleting enemy")
 			io.stdout:flush()
@@ -93,4 +99,14 @@ function love.draw()
 
     -- Draw end text
     if stage.over then love.graphics.print("GAME OVER!", love.graphics.getWidth()/2 -150, love.graphics.getHeight()/2, 0, 5, 5) end
+end
+
+function readFile(filename)
+	local tab = {}
+	local contents, err = love.filesystem.read(filename)
+	if not contents then error("Table not read\n") end
+	for line in contents:gmatch("[^\r\n]+") do
+		table.insert(tab, line)
+	end
+	return tab
 end

@@ -1,11 +1,13 @@
 local cprojectile = require("projectile")
 Projectile = cprojectile.Projectile
+local cinstructions = require("instructions")
+Instructions = cinstructions.Instructions
 
 -- Enemy "class"
 local Enemy = {}
 Enemy.__index = Enemy
 
-function Enemy.new(x, y, r, sx, sy, spr, sprW, sprH)
+function Enemy.new(x, y, r, sx, sy, spr, sprW, sprH, instructions, shotSprite, projectileTable)
 	local self = setmetatable({}, Enemy)
 	self.x = x or 0
 	self.y = y or 0
@@ -13,6 +15,7 @@ function Enemy.new(x, y, r, sx, sy, spr, sprW, sprH)
 	self.sx = sx or 1
 	self.sy = sy or 1
 	self.sprite = spr
+	self.shotSprite = shotSprite
 	self.w = sprW or 128
 	self.h = sprH or 128
 	self.health = 100
@@ -23,24 +26,30 @@ function Enemy.new(x, y, r, sx, sy, spr, sprW, sprH)
 	self.maxHurtCooldown = 0.1
 	self.xSpeed = 0
 	self.ySpeed = 0
-	self.drag = 30
+	self.drag = 5
 	self.maxMoveSpeed = 500
-
+	self.instructions = Instructions.new(instructions, self)
+	self.projectiles = projectileTable
+	self.autoShoot = false
 	return self
 end
 
-function Enemy:update(dt, projectileTable)
+function Enemy:update(dt)
     self.shotCooldown = math.max(0, self.shotCooldown - dt)
     self.hurtCooldown = math.max(0, self.hurtCooldown - dt)
+    if self.instructions then
+    	self.instructions:callInstructions(dt)
+    end
     self:posUpdate(dt)
+    if autoShoot then self:shoot(false) end
 
     -- Run collision checks
     if self.hurtCooldown <= 0 then
-    	for _, p in ipairs(projectileTable) do
+    	for _, p in ipairs(projectiles) do
 			if p.affectEnemy and p:collidesWith(self) then
 				p.health = p.health - 1
 				self.health = self.health - p.damage
-				self.hurtCooldown = maxHurtCooldown
+				self.hurtCooldown = self.maxHurtCooldown
 			end
     	end
     end
@@ -50,7 +59,7 @@ function Enemy:update(dt, projectileTable)
         self._debugTimer = 0
         --self:printStatus()
     end
-end 
+end
 
 function Enemy:draw()
 	if self.hurtCooldown > 0 then love.graphics.setColor(1,1,1,0.3) end
@@ -58,13 +67,14 @@ function Enemy:draw()
     love.graphics.setColor(1,1,1,1)
 end
 
-function Enemy:shoot(projectileTable, sprite)
-	if (self.shotCooldown <= 0) then
+function Enemy:shoot(override)
+	if not projectiles then return false end
+	if (self.shotCooldown <= 0 or override) then
 		self.shotCooldown = self.maxShotCooldown
-		local spriteW = sprite:getWidth()
-		local shot = Projectile.new(self:getXCenter() - (spriteW / 2), self.y + 10, 0, 1, 1, sprite, spriteW, sprite:getHeight(), self.shotDamage, false, true)
-		shot.ySpeed = 600
-		table.insert(projectileTable, shot)
+		local spriteW = self.shotSprite:getWidth()
+		local shot = Projectile.new(self:getXCenter() - (spriteW / 2), self.y + 10, 0, 0.3, 0.3, self.shotSprite, spriteW, self.shotSprite:getHeight(), self.shotDamage, false, true)
+		shot.ySpeed = 1000
+		table.insert(projectiles, shot)
 	end
 end
 
