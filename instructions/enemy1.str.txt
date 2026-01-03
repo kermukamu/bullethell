@@ -1,11 +1,35 @@
-setXSpeed -1500
+setXSpeed -250
 wait 250
 shoot
 wait 250
 shoot
 wait 250
 shoot
-setXSpeed 1500
+wait 250
+shoot
+wait 250
+shoot
+wait 250
+shoot
+wait 250
+shoot
+wait 250
+shoot
+wait 250
+shoot
+wait 250
+shoot
+wait 250
+shoot
+wait 250
+shoot
+setXSpeed 500
+wait 250
+shoot
+wait 250
+shoot
+wait 250
+shoot
 wait 250
 shoot
 wait 250
