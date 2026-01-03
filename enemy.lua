@@ -81,19 +81,27 @@ function Enemy:shoot(override)
 end
 
 function Enemy:getXCenter()
-	local retX = self.x + (self.w / 2)
+	local retX = self.x + (self:scaledW() / 2)
 	return retX
 end
  
 function Enemy:getYCenter()
-	local retY = self.y + (self.h / 2) 
+	local retY = self.y + (self:scaledH() / 2) 
 	return retY
 end
 
 function Enemy:centerToPos()
-	self.x = self.x - (self.w / 2)
-	self.y = self.y - (self.h / 2)
+	self.x = self.x - (self:scaledW() / 2)
+	self.y = self.y - (self:scaledH() / 2)
 end
+
+function Enemy:scaledW()
+	return self.w * self.sx
+end
+
+function Enemy:scaledH()
+	return self.h * self.sy
+end 
 
 function Enemy:posUpdate(dt)
 	-- Update Enemy position

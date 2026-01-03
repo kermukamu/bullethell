@@ -42,10 +42,10 @@ function Projectile:draw()
 end
 
 function Projectile:collidesWith(object)
-	return self.x < object.x + object.w and
-		object.x < self.x + self.w and
-		self.y < object.y + object.h and
-		object.y < self.y + self.h
+	return self.x < object.x + object:scaledW() and
+		object.x < self.x + self:scaledW() and
+		self.y < object.y + object:scaledH() and
+		object.y < self.y + self:scaledH()
 end
 
 function Projectile:shouldDestroy()
@@ -59,12 +59,29 @@ function Projectile:shouldDestroy()
 	return false
 end
 
-function Projectile:normDirectionTo(object)
-	local a = object.x - self.x
-	local b = object.y - self.y
+function Projectile:getXCenter()
+	local retX = self.x + (self.w / 2)
+	return retX
+end
+ 
+function Projectile:getYCenter()
+	local retY = self.y + (self.h / 2) 
+	return retY
+end
+
+function Projectile:scaledW()
+	return self.w * self.sx
+end
+
+function Projectile:scaledH()
+	return self.h * self.sy
+end
+
+function Projectile:normDirectionTo(x, y)
+	local a = x - self:getXCenter()
+	local b = y - self:getYCenter()
 	local c = math.sqrt(a^2 + b^2)
 	return {a / c, b / c}
-
 end
 
 return { Projectile = Projectile}

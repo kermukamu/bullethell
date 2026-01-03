@@ -24,7 +24,7 @@ function Player.new(x, y, r, sx, sy, sprW, sprH, level)
 	self.xSpeed = 0
 	self.ySpeed = 0
 	self.dashSpeed = 0
-	self.drag = 30
+	self.drag = 1000
 	self.maxMoveSpeed = 500
 	self.maxDashSpeed = 4000
 	self.maxShotCooldown = 0.1
@@ -116,18 +116,26 @@ function Player:movement()
 end
 
 function Player:getXCenter()
-	local retX = self.x + (self.w / 2) * self.sy
+	local retX = self.x + (self:scaledW() / 2)
 	return retX
 end
 
 function Player:getYCenter()
-	local retY = self.y + (self.h * self.sy / 2)
+	local retY = self.y + (self:scaledH() / 2)
 	return retY
 end
 
+function Player:scaledW()
+	return self.w * self.sx
+end
+
+function Player:scaledH()
+	return self.h * self.sy
+end
+
 function Player:centerToPos()
-	self.x = self.x - (self.w / 2)
-	self.y = self.y - (self.h / 2)
+	self.x = self.x - (self:scaledW() / 2)
+	self.y = self.y - (self:scaledH() / 2)
 end
 
 function Player:printStatus()
