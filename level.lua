@@ -41,7 +41,7 @@ function Level.new(sT, debugmode)
 	end
 	local px = love.graphics.getWidth() / 2
 	local py = love.graphics.getHeight() / 2
-	self.player = Player.new(px, py, 0, 1, 1, sT.pSpr:getWidth(), sT.pSpr:getHeight(), self)
+	self.player = Player.new(px, py, 0, 0.5, 0.5, sT.pSpr:getWidth(), sT.pSpr:getHeight(), self)
 	self.player:centerToPos()
 
 	-- Add test enemies
