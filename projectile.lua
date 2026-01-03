@@ -59,4 +59,12 @@ function Projectile:shouldDestroy()
 	return false
 end
 
+function Projectile:normDirectionTo(object)
+	local a = object.x - self.x
+	local b = object.y - self.y
+	local c = math.sqrt(a^2 + b^2)
+	return {a / c, b / c}
+
+end
+
 return { Projectile = Projectile}

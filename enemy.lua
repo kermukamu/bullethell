@@ -7,15 +7,14 @@ Instructions = cinstructions.Instructions
 local Enemy = {}
 Enemy.__index = Enemy
 
-function Enemy.new(x, y, r, sx, sy, spr, sprW, sprH, instructions, shotSprite, projectileTable)
+function Enemy.new(x, y, r, sx, sy, spr, sprW, sprH, instructions, level)
 	local self = setmetatable({}, Enemy)
 	self.x = x or 0
 	self.y = y or 0
 	self.r = r or 0
 	self.sx = sx or 1
 	self.sy = sy or 1
-	self.sprite = spr
-	self.shotSprite = shotSprite
+	self.sprite = level.sT.eSpr
 	self.w = sprW or 128
 	self.h = sprH or 128
 	self.health = 100
@@ -26,11 +25,11 @@ function Enemy.new(x, y, r, sx, sy, spr, sprW, sprH, instructions, shotSprite, p
 	self.maxHurtCooldown = 0.1
 	self.xSpeed = 0
 	self.ySpeed = 0
-	self.drag = 5
+	self.drag = 0
 	self.maxMoveSpeed = 500
 	self.instructions = Instructions.new(instructions, self)
-	self.projectiles = projectileTable
 	self.autoShoot = false
+	self.level = level
 	return self
 end
 
@@ -45,7 +44,7 @@ function Enemy:update(dt)
 
     -- Run collision checks
     if self.hurtCooldown <= 0 then
-    	for _, p in ipairs(projectiles) do
+    	for _, p in ipairs(self.level.projectileTable) do
 			if p.affectEnemy and p:collidesWith(self) then
 				p.health = p.health - 1
 				self.health = self.health - p.damage
@@ -68,13 +67,16 @@ function Enemy:draw()
 end
 
 function Enemy:shoot(override)
-	if not projectiles then return false end
+	if not self.level.projectileTable then return false end
 	if (self.shotCooldown <= 0 or override) then
 		self.shotCooldown = self.maxShotCooldown
-		local spriteW = self.shotSprite:getWidth()
-		local shot = Projectile.new(self:getXCenter() - (spriteW / 2), self.y + 10, 0, 0.3, 0.3, self.shotSprite, spriteW, self.shotSprite:getHeight(), self.shotDamage, false, true)
+		local sprite = self.level.sT.eShotSpr
+		local spriteW = sprite:getWidth()
+		local spriteH = sprite:getHeight()
+		local scale = 0.6
+		local shot = Projectile.new(self:getXCenter() - (spriteW * scale / 2), self.y + 10, 0, scale, scale, self.level.sT.eShotSpr, spriteW, spriteH, self.shotDamage, false, true)
 		shot.ySpeed = 1000
-		table.insert(projectiles, shot)
+		table.insert(self.level.projectileTable, shot)
 	end
 end
 
@@ -82,10 +84,15 @@ function Enemy:getXCenter()
 	local retX = self.x + (self.w / 2)
 	return retX
 end
-
+ 
 function Enemy:getYCenter()
 	local retY = self.y + (self.h / 2) 
 	return retY
+end
+
+function Enemy:centerToPos()
+	self.x = self.x - (self.w / 2)
+	self.y = self.y - (self.h / 2)
 end
 
 function Enemy:posUpdate(dt)

@@ -5,15 +5,16 @@ Projectile = cprojectile.Projectile
 local Player = {}
 Player.__index = Player
 
-function Player.new(x, y, r, sx, sy, spr, sprW, sprH, shotSprite, projectileTable)
+function Player.new(x, y, r, sx, sy, sprW, sprH, level)
 	local self = setmetatable({}, Player)
+	self.level = level
+
 	self.x = x or 0
 	self.y = y or 0
 	self.r = r or 0
 	self.sx = sx or 1
 	self.sy = sy or 1
-	self.sprite = spr
-	self.shotSprite = shotSprite
+	self.sprite = level.sT.pSpr
 	self.w = sprW or 128
 	self.h = sprH or 128
 	self.health = 100
@@ -24,7 +25,7 @@ function Player.new(x, y, r, sx, sy, spr, sprW, sprH, shotSprite, projectileTabl
 	self.ySpeed = 0
 	self.dashSpeed = 0
 	self.drag = 30
-	self.maxMoveSpeed = 1000
+	self.maxMoveSpeed = 500
 	self.maxDashSpeed = 4000
 	self.maxShotCooldown = 0.1
 	self.maxHurtCooldown = 1
@@ -43,7 +44,7 @@ function Player:update(dt)
 
     -- Run collision checks between projectiles and player
     if self.hurtCooldown <= 0 then
-    	for _, p in ipairs(self.projectiles) do
+    	for _, p in ipairs(self.level.projectileTable) do
 			if p.affectPlayer and p:collidesWith(self) then
 				p.health = p.health - 1
 				self.health = self.health - p.damage
@@ -83,10 +84,13 @@ end
 function Player:shoot()
 	if (self.shotCooldown <= 0) then
 		self.shotCooldown = self.maxShotCooldown
-		local spriteW = self.shotSprite:getWidth()
-		local shot = Projectile.new(self:getXCenter() - (spriteW / 2), self.y - 10, 0, 0.6, 0.6, self.shotSprite, spriteW, self.shotSprite:getHeight(), self.shotDamage, true, false)
+		local sprite = self.level.sT.pShotSpr
+		local spriteW = sprite:getWidth()
+		local spriteH = sprite:getHeight()
+		local scale = 0.6
+		local shot = Projectile.new(self:getXCenter() - (spriteW * scale / 2), self.y - 10, 0, scale, scale, self.level.sT.pShotSpr, spriteW, spriteH, self.shotDamage, true, false)
 		shot.ySpeed = -6000
-		table.insert(projectiles, shot)
+		table.insert(self.level.projectileTable, shot)
 	end
 end
 
@@ -112,13 +116,18 @@ function Player:movement()
 end
 
 function Player:getXCenter()
-	local retX = self.x + (self.w / 2)
+	local retX = self.x + (self.w / 2) * self.sy
 	return retX
 end
 
 function Player:getYCenter()
-	local retY = self.y + (self.h / 2) 
+	local retY = self.y + (self.h * self.sy / 2)
 	return retY
+end
+
+function Player:centerToPos()
+	self.x = self.x - (self.w / 2)
+	self.y = self.y - (self.h / 2)
 end
 
 function Player:printStatus()
