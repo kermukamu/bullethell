@@ -36,7 +36,7 @@ function Instructions:readInstruction(instruction)
     	return false
   	end
 
-  	-- Parse
+  -- Parse
 	local parts = {}
 	for part in instruction:gmatch("%S+") do
 		table.insert(parts, part)
@@ -87,7 +87,7 @@ function Instructions:callInstructions(dt)
 	local keepReading = true
 	while self.wait <= 0 and keepReading do
 		keepReading = self:readInstruction(self.instructionList[self.ind])
-    end
+	end
 end
 
 
