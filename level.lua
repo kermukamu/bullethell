@@ -40,7 +40,7 @@ function Level.new(sT, debugmode)
 		io.stdout:flush()
 	end
 	local px = love.graphics.getWidth() / 2
-	local py = love.graphics.getHeight() / 2
+	local py = love.graphics.getHeight() - 80
 	self.player = Player.new(px, py, 0, 0.5, 0.5, sT.pSpr:getWidth(), sT.pSpr:getHeight(), self)
 	self.player:centerToPos()
 
@@ -63,7 +63,7 @@ function Level.new(sT, debugmode)
 end
 
 function Level:update(dt)
-	self.timer = self.timer + 1
+	self.timer = self.timer + 1 * dt
 	if (not self.isOver) then self.player:update(dt) end
 	if love.keyboard.isDown("space") then self.player:shoot() end
 
@@ -93,7 +93,6 @@ function Level:update(dt)
 end
 
 function Level:draw()
-	love.graphics.draw(self.sT.bg, 0, 0)
 	if (not self.isOver) then 
 		self.player:draw()
 		love.graphics.print(("x=%.1f y=%.1f\nvx=%.1f vy=%.1f"):format(self.player.x, self.player.y, self.player.xSpeed, self.player.ySpeed), 10, 10)
