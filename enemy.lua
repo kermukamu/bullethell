@@ -22,7 +22,7 @@ function Enemy.new(x, y, r, sx, sy, spr, sprW, sprH, instructions, level)
 	self.shotCooldown = 0
 	self.hurtCooldown = 0
 	self.maxShotCooldown = 1
-	self.maxHurtCooldown = 0.1
+	self.maxHurtCooldown = 0.2
 	self.xSpeed = 0
 	self.ySpeed = 0
 	self.drag = 0
@@ -40,7 +40,7 @@ function Enemy:update(dt)
     	self.instructions:callInstructions(dt)
     end
     self:posUpdate(dt)
-    if autoShoot then self:shoot(false) end
+    if self.autoShoot then self:shoot(false) end
 
     -- Run collision checks
     if self.hurtCooldown <= 0 then
@@ -61,7 +61,7 @@ function Enemy:update(dt)
 end
 
 function Enemy:draw()
-	if self.hurtCooldown > 0 then love.graphics.setColor(1,1,1,0.3) end
+	if self.hurtCooldown > 0 then love.graphics.setColor(1,1,1,1-(self.hurtCooldown/self.maxHurtCooldown)) end
     love.graphics.draw(self.sprite, self.x, self.y, self.r, self.sx, self.sy)
     love.graphics.setColor(1,1,1,1)
 end

@@ -27,10 +27,10 @@ function Player.new(x, y, r, sx, sy, sprW, sprH, level)
 	self.drag = 1000
 	self.maxMoveSpeed = 500
 	self.maxDashSpeed = 4000
+	self.dashDistance = 150
 	self.maxShotCooldown = 0.1
 	self.maxHurtCooldown = 1
 	self.shotDamage = 30
-	self.projectiles = projectileTable
 
 	return self
 end
@@ -53,7 +53,6 @@ function Player:update(dt)
     	end
     end
 
-
     self._debugTimer = (self._debugTimer or 0) + dt
     if self._debugTimer >= 0.5 then
         self._debugTimer = 0
@@ -62,7 +61,7 @@ function Player:update(dt)
 end
 
 function Player:draw()
-	if self.hurtCooldown > 0 then love.graphics.setColor(1,1,1,0.3) end
+	if self.hurtCooldown > 0 then love.graphics.setColor(1,1,1,1-(self.hurtCooldown/self.maxHurtCooldown)) end
     love.graphics.draw(self.sprite, self.x, self.y, self.r, self.sx, self.sy)
     love.graphics.setColor(1,1,1,1)
 end
@@ -71,10 +70,12 @@ function Player:dash(direction)
 	if (self.dashCooldown <= 0) then
 		self.dashCooldown = 0.5
     	if direction then
-      		self.dashSpeed = self.maxDashSpeed
+      		--self.dashSpeed = self.maxDashSpeed
+      		self.x = self.x + self.dashDistance
       		print("Dashing right")
     	else
-      		self.dashSpeed = -self.maxDashSpeed
+      		--self.dashSpeed = -self.maxDashSpeed
+      		self.x = self.x - self.dashDistance
       		print("Dashing left")
     	end
     	io.stdout:flush()
