@@ -1,5 +1,7 @@
 local cprojectile = require("projectile")
 Projectile = cprojectile.Projectile
+local ccool3d = require("cool3d")
+Cool3d = ccool3d.Cool3d
 
 -- Player "class"
 local Player = {}
@@ -32,6 +34,8 @@ function Player.new(x, y, r, sx, sy, sprW, sprH, level)
 	self.maxHurtCooldown = 1
 	self.shotDamage = 30
 
+	self.healthBarVisual = Cool3d.new(self.level.debugmode, 100, love.graphics.getHeight() - 100, 250)
+	self.healthBarVisual:readFile("3d/diamond.txt")
 	return self
 end
 
@@ -53,10 +57,11 @@ function Player:update(dt)
     	end
     end
 
+	self.healthBarVisual.dt = dt -- Update to synchronize health bar animation with time
+
     self._debugTimer = (self._debugTimer or 0) + dt
     if self._debugTimer >= 0.5 then
         self._debugTimer = 0
-        --self:printStatus()
     end
 end
 
@@ -64,6 +69,13 @@ function Player:draw()
 	if self.hurtCooldown > 0 then love.graphics.setColor(1,1,1,1-(self.hurtCooldown/self.maxHurtCooldown)) end
     love.graphics.draw(self.sprite, self.x, self.y, self.r, self.sx, self.sy)
     love.graphics.setColor(1,1,1,1)
+
+    for i=1, self.health, 25 do
+		self.healthBarVisual:draw()
+		self.healthBarVisual.x2d = self.healthBarVisual.x2d + 100
+	end
+
+	self.healthBarVisual.x2d = 100
 end
 
 function Player:dash(direction)
@@ -137,21 +149,6 @@ end
 function Player:centerToPos()
 	self.x = self.x - (self:scaledW() / 2)
 	self.y = self.y - (self:scaledH() / 2)
-end
-
-function Player:printStatus()
-	print("---- PLAYER STATUS ----")
-	print("Position:", self.x, self.y)
-	print("Rotation:", self.r)
-	print("Scale:", self.sx, self.sy)
-	print("Size:", self.w, self.h)
-	print("Health:", self.health)
-	print("X Speed:", self.xSpeed)
-	print("Y Speed:", self.ySpeed)
-	print("Dash Cooldown:", self.dashCooldown)
-
-	print("------------------------")
-	io.stdout:flush()
 end
 
 function Player:posUpdate(dt)
