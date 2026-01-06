@@ -16,8 +16,8 @@ function Button.new(text, func, w, h, centX, centY, textScale)
 end
 
 function Button:draw()
-	local tWidth = love.graphics.getFont():getWidth(self.text)
-	local tHeight = love.graphics.getFont():getHeight()
+	local tWidth = love.graphics.getFont():getWidth(self.text) * self.tScale
+	local tHeight = love.graphics.getFont():getHeight() * self.tScale
 	local recXY = self:asCenter(self.centX, self.centY, self.w, self.h)
 	local textXY = self:asCenter(self.centX, self.centY, tWidth, tHeight)
 
