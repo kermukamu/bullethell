@@ -2,7 +2,7 @@
 local Cool3d = {}
 Cool3d.__index = Cool3d
 
-function Cool3d.new(debugmode)
+function Cool3d.new(debugmode, x2d, y2d, modelScale)
 	local self = setmetatable({}, Cool3d)
 	self.debugmode = debugmode
 
@@ -14,7 +14,11 @@ function Cool3d.new(debugmode)
 	self.angle = 0
     self.rotSpeed = 0.5 -- Speed of rotation
     self.timer = 0
-    self.zSpeed = 1 -- Speed of z variation
+    self.zSpeed = 0.2 -- Speed of z variation
+
+    self.x2d = x2d or 0
+    self.y2d = y2d or 0
+    self.modelScale = modelScale or 1
 
 	return self
 end
@@ -75,8 +79,8 @@ function Cool3d:draw()
     love.graphics.setLineWidth(self.lineWidth or 1)
 
     local w, h = love.graphics.getDimensions()
-    local cx, cy = w * 0.5, h * 0.5
-    local scale = 500
+    local cx, cy = self.x2d, self.y2d
+    local scale = self.modelScale
 
     -- Project all points once
     local screen = {}   -- screen[i] = {x, y} or nil if not drawable
