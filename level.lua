@@ -37,10 +37,6 @@ function Level.new(debugmode, host)
 	self.sT.eSpr = love.graphics.newImage('sprites/tile2.png')
 	self.sT.eShotSpr = love.graphics.newImage('sprites/enemyShot.png')
 
-	-- Create a cool 3D background
-	self.bg = Cool3d.new(debugmode)
-	self.bg:readFile("3d/diamond.txt")
-
 	-- Initialize player
 	if self.debugmode then
 		print("Setting up the player for level")
@@ -74,8 +70,6 @@ function Level:update(dt)
 	if (not self.isOver) then self.player:update(dt) end
 	if love.keyboard.isDown("space") then self.player:shoot() end
 
-	self.bg.dt = dt -- Update to synchronize background animation
-
 	-- Update projectiles
 	for i = #self.projectileTable, 1, -1 do
 		local p = self.projectileTable[i]
@@ -106,9 +100,6 @@ function Level:draw()
 		self.player:draw()
 		love.graphics.print(("x=%.1f y=%.1f\nvx=%.1f vy=%.1f"):format(self.player.x, self.player.y, self.player.xSpeed, self.player.ySpeed), 10, 10)
 	end
-
-	-- Draw background
-	self.bg:draw()
 
 	-- Draw projectiles
 	for _, p in ipairs(self.projectileTable) do
