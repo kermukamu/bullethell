@@ -6,8 +6,8 @@ local cenemy = require("enemy")
 Enemy = cenemy.Enemy
 local cinstructions = require("instructions")
 Instructions = cinstructions.Instructions
-local ccool3dBg = require("cool3dbg")
-Cool3dBg = ccool3dBg.Cool3dBg
+local ccool3d = require("cool3d")
+Cool3d = ccool3d.Cool3d
 
 -- Level "class"
 local Level = {}
@@ -38,7 +38,7 @@ function Level.new(debugmode, host)
 	self.sT.eShotSpr = love.graphics.newImage('sprites/enemyShot.png')
 
 	-- Create a cool 3D background
-	self.bg = Cool3dBg.new(debugmode)
+	self.bg = Cool3d.new(debugmode)
 	self.bg:readFile("3d/diamond.txt")
 
 	-- Initialize player
