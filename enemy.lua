@@ -18,7 +18,7 @@ function Enemy.new(x, y, r, sx, sy, spr, sprW, sprH, instructions, level)
 	self.w = sprW or 128
 	self.h = sprH or 128
 	self.health = 100
-	self.shotDamage = 10
+	self.shotDamage = 25
 	self.shotCooldown = 0
 	self.hurtCooldown = 0
 	self.maxShotCooldown = 1
