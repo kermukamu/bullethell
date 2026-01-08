@@ -36,6 +36,11 @@ function Scene:setupMainMenu()
 	table.insert(self.stage.buttonTable, Button.new("Start", function() self:setupLevel() end, 500, 250, love.graphics.getWidth()/2, love.graphics.getHeight()/2, 3))
 end
 
+function Scene:printXCenteredText(text, x, y, scale)
+	local tX = x - love.graphics.getFont():getWidth(text)*scale/2
+	love.graphics.print(text, tX, y, 0, scale, scale)
+end
+
 function Scene:setupLevel()
 	if self.debugmode then
 		print("Loading a level")
