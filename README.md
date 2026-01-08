@@ -1,5 +1,7 @@
 A fun bullet hell type video game project of mine
 
+Includes some fancy 3D drawing functions!
+
 Steps to run the game
 
 1: Install LÖVE aka Love2D from the official website https://love2d.org/
