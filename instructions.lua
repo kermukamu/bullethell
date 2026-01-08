@@ -69,7 +69,10 @@ function Instructions:readInstruction(instruction)
 	end
 
 	if parts[1] == "shoot" then
-		self.host:shoot(true)
+		self:commandIntegrity(tonumber(parts[2]))
+		self:commandIntegrity(tonumber(parts[3]))
+		self:commandIntegrity(tonumber(parts[4]))
+		self.host:shoot(tonumber(parts[2]) * self.mag, tonumber(parts[3]), tonumber(parts[4]))
 	end
 
 	self.ind = self.ind + 1
