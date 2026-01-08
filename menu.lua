@@ -11,7 +11,6 @@ function Menu.new(debugmode, host)
 	self.host = host
 
 	self.buttonTable = {}
-
 	return self
 end
 
@@ -22,6 +21,9 @@ function Menu:draw()
 	for _, b in ipairs(self.buttonTable) do
 		b:draw()
 	end
+
+	-- Draw controls text
+	self.host:printXCenteredText("WASD to move\nSHIFT for speed\nSPACE to shoot", love.graphics.getWidth()/2, love.graphics.getHeight()/2 - 300, 3)
 end
 
 function Menu:mousepressed(mx, my, button)
@@ -35,8 +37,7 @@ function Menu:mousepressed(mx, my, button)
 end
 
 function Menu:keypressed(key)
-	print("No action on key press")
-	io.stdout:flush()
+	self.buttonTable[1].func() -- If any key is pressed. A placeholder solution until more complicated menu exists
 end
 
 return { Menu = Menu}
