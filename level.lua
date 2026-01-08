@@ -68,8 +68,8 @@ function Level:update(dt)
 			local spawnX2 = love.graphics.getWidth() + 50
 
 			-- Set random y value for spawn location
-			local spawnY1 = math.random(100, love.graphics.getHeight() / 2)
-			local spawnY2 = math.random(100, love.graphics.getHeight() / 2)
+			local spawnY1 = math.random(-100, love.graphics.getHeight() / 2)
+			local spawnY2 = math.random(-100, love.graphics.getHeight() / 2)
 
 			local enemyLeft = Enemy.new(spawnX1, spawnY1, 0, 0.8, 0.8, 64, 64, self.enemyInstructions, self)
 			local enemyRight = Enemy.new(spawnX2, spawnY2, 0, 0.8, 0.8, 64, 64, self.enemyInstructions, self)
@@ -81,6 +81,18 @@ function Level:update(dt)
 			-- Mirror directions in instructions
 			enemyLeft.instructions.mag = 1
 			enemyRight.instructions.mag = -1
+
+			-- Set xSpeed multiplier as a random constant between 0.8 and 1.5
+			local xSMultMin = 0.8
+			local xSMultMax = 1.5
+			enemyLeft.xSpeedMult = xSMultMin + math.random() * (xSMultMax - xSMultMin)
+			enemyRight.xSpeedMult = xSMultMin + math.random() * (xSMultMax - xSMultMin)
+
+			-- Set ySpeed multiplier as a random constant between -1 and 1
+			local ySMultMin = -1
+			local ySMultMax = 1
+			enemyLeft.ySpeedMult = ySMultMin + math.random() * (ySMultMax - ySMultMin)
+			enemyRight.ySpeedMult = ySMultMin + math.random() * (ySMultMax - ySMultMin)
 
 			table.insert(self.enemyTable, enemyLeft)
 			table.insert(self.enemyTable, enemyRight)
