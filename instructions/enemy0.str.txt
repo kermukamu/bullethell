@@ -1,7 +1,7 @@
 wait 50
 setXSpeed 250
+setYSpeed 100
 wait 100
-setXSpeed 250
 shoot 0 100 0.3
 wait 50
 shoot 10 100 0.3
@@ -73,5 +73,5 @@ wait 50
 shoot 340 100 0.3
 wait 50
 shoot 350 100 0.3
-goto 4
+goto 5
 end
