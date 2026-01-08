@@ -173,7 +173,7 @@ function Level:draw()
 		love.graphics.print(("x=%.1f y=%.1f\nvx=%.1f vy=%.1f"):format(self.player.x, self.player.y, self.player.xSpeed, self.player.ySpeed), 10, 10)
 
 		-- Draw score at top
-		self:printXCenteredText(("Score: %.0f"):format(self.score), love.graphics.getWidth()/2, 40, 1)
+		self:printXCenteredText(("Score: %.0f"):format(self.score), love.graphics.getWidth()/2, 40, 3)
 	end
 
 	-- Draw projectiles
