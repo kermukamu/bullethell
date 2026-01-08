@@ -8,7 +8,7 @@ function Instructions.new(instructionTable, host)
 	self.host = host
 	self.ind = 1
 	self.wait = 0
-	self.mag = 1 -- For multiplying certain actions with a constant
+	self.mag = 1 -- For multiplying certain actions with a constant, usually to mirror angles
 	return self
 end
 
@@ -67,6 +67,13 @@ function Instructions:readInstruction(instruction)
 		self.host.xSpeed = tonumber(parts[2]) * self.mag
 		io.stdout:flush()
 	end
+
+	if parts[1] == "setYSpeed" then 
+		self:commandIntegrity(tonumber(parts[2]))
+		self.host.ySpeed = tonumber(parts[2])
+		io.stdout:flush()
+	end
+
 
 	if parts[1] == "shoot" then
 		self:commandIntegrity(tonumber(parts[2]))
