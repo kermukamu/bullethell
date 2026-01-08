@@ -7,16 +7,15 @@ Instructions = cinstructions.Instructions
 local Enemy = {}
 Enemy.__index = Enemy
 
-function Enemy.new(x, y, r, sx, sy, spr, sprW, sprH, instructions, level)
+function Enemy.new(x, y, r, sx, sy, w, h, instructions, level)
 	local self = setmetatable({}, Enemy)
 	self.x = x or 0
 	self.y = y or 0
 	self.r = r or 0
 	self.sx = sx or 1
 	self.sy = sy or 1
-	self.sprite = level.sT.eSpr
-	self.w = sprW or 128
-	self.h = sprH or 128
+	self.w = w or 128
+	self.h = h or 128
 	self.health = 100
 	self.shotDamage = 25
 	self.hurtCooldown = 0
@@ -61,20 +60,15 @@ function Enemy:update(dt)
 end
 
 function Enemy:draw()
-    -- love.graphics.draw(self.sprite, self.x, self.y, self.r, self.sx, self.sy)
     love.graphics.setColor(1,0,math.sin(self.cShift),self.opaque)
     love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)
     love.graphics.setColor(1,1,1,1)
 end
 
-function Enemy:shoot(angleDeg, speed, size)
+function Enemy:shoot(angleDeg, speed, scale)
 	if not self.level.enemyProjectileTable then return false end
-
-	local sprite = self.level.sT.eShotSpr
-	local spriteW = sprite:getWidth()
-	local spriteH = sprite:getHeight()
-	local scale = size
-	local shot = Projectile.new(self:getXCenter() - (spriteW * scale / 2), self.y + 10, 0, scale, scale, self.level.sT.eShotSpr, spriteW, spriteH, self.shotDamage, false, true)
+	local size = 32
+	local shot = Projectile.new(self:getXCenter() - (size * scale / 2), self.y + 10, 0, scale, scale, size, size, self.shotDamage, false, true)
 	shot.xSpeed = math.sin(math.rad(angleDeg)) * speed + self.xSpeed
 	shot.ySpeed = math.cos(math.rad(angleDeg)) * speed + self.ySpeed
 	table.insert(self.level.enemyProjectileTable, shot)

@@ -12,17 +12,8 @@ Scene.__index = Scene
 function Scene.new(debugmode)
 	local self = setmetatable({}, Scene)
 	self.debugmode = debugmode
+
 	self.stage = {}
-
-	 -- Load sprites to a sprite table
-    if debugmode then
-		print("Loading sprites")
-		io.stdout:flush()
-	end
-
-    self.sT = {}
-	self.sT.pSpr = love.graphics.newImage('sprites/chr.png')
-	self.sT.pShotSpr = love.graphics.newImage('sprites/playerShot.png')
 
 	return self
 end
@@ -33,12 +24,12 @@ function Scene:setupMainMenu()
 		io.stdout:flush()
 	end
 	self.stage = Menu.new(self.debugmode, self)
+	
+	-- Draw controls text
+	self.stage:printXCenteredText("WASD to move\nSHIFT for speed\nSPACE to shoot", love.graphics.getWidth()/2, love.graphics.getHeight()/2 - 300, 3)
+	
+	-- Initialize start button	
 	table.insert(self.stage.buttonTable, Button.new("Start", function() self:setupLevel() end, 500, 250, love.graphics.getWidth()/2, love.graphics.getHeight()/2, 3))
-end
-
-function Scene:printXCenteredText(text, x, y, scale)
-	local tX = x - love.graphics.getFont():getWidth(text)*scale/2
-	love.graphics.print(text, tX, y, 0, scale, scale)
 end
 
 function Scene:setupLevel()

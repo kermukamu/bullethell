@@ -2,16 +2,15 @@
 local Projectile = {}
 Projectile.__index = Projectile
 
-function Projectile.new(x, y, r, sx, sy, spr, sprW, sprH, damage, affectEnemy, affectPlayer)
+function Projectile.new(x, y, r, sx, sy, w, h, damage, affectEnemy, affectPlayer)
 	local self = setmetatable({}, Projectile)
 	self.x = x or 0
 	self.y = y or 0
 	self.r = r or 0
 	self.sx = sx or 0.2
 	self.sy = sy or 0.2
-	self.sprite = spr
-	self.w = sprW or 10
-	self.h = sprH or 10
+	self.w = w or 10
+	self.h = h or 10
 	self.health = 1
 	self.damage = damage or 0
 	self.xSpeed = 0
@@ -40,7 +39,6 @@ function Projectile:posUpdate(dt)
 end
 
 function Projectile:draw()
-    -- love.graphics.draw(self.sprite, self.x, self.y, self.r, self.sx, self.sy)
     if self.affectPlayer then
     	love.graphics.setColor(1,0,math.sin(self.cShift),1)
     	love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)

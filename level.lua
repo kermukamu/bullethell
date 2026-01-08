@@ -16,7 +16,6 @@ Level.__index = Level
 function Level.new(debugmode, host)
 	local self = setmetatable({}, Level)
 	self.debugmode = debugmode
-	self.sT = host.sT
 	self.host = host
 
 	if debugmode then
@@ -30,13 +29,11 @@ function Level.new(debugmode, host)
 	self.enemyProjectileTable = {}
 	self.playerProjectileTable = {}
 
-	-- Load level sprites
-	if self.debugmode then
-		print("Initializing sprites for level")
-		io.stdout:flush()
-	end
-	self.sT.eSpr = love.graphics.newImage('sprites/tile2.png')
-	self.sT.eShotSpr = love.graphics.newImage('sprites/enemyShot.png')
+	self.originalSpawnInterval = 10
+	self.enemySpawnInterval = self.originalSpawnInterval
+	self.enemySpawnCount = 1 -- Actual spawned amount is twice due to mirroring
+	self.spawnTimer = 0
+	self.endingTextWait = 2
 
 	-- Initialize player
 	if self.debugmode then
@@ -45,7 +42,7 @@ function Level.new(debugmode, host)
 	end
 	local px = love.graphics.getWidth() / 2
 	local py = love.graphics.getHeight() - 80
-	self.player = Player.new(px, py, 0, 0.2, 0.2, self.sT.pSpr:getWidth(), self.sT.pSpr:getHeight(), self)
+	self.player = Player.new(px, py, 0, 0.2, 0.2, 128, 128, self)
 	self.player:centerToPos()
 
 	-- Read enemy instructions
@@ -54,11 +51,7 @@ function Level.new(debugmode, host)
 		print("Enemy instructions successfully read!\n")
 		io.stdout:flush()
 	end
-	self.originalSpawnInterval = 10
-	self.enemySpawnInterval = self.originalSpawnInterval
-	self.enemySpawnCount = 1 -- Actual spawned amount is twice due to mirroring
-	self.spawnTimer = 0
-	self.endingTextWait = 2
+
 	return self
 end
 
@@ -78,8 +71,8 @@ function Level:update(dt)
 			local spawnY1 = math.random(100, love.graphics.getHeight() / 2)
 			local spawnY2 = math.random(100, love.graphics.getHeight() / 2)
 
-			local enemyLeft = Enemy.new(spawnX1, spawnY1, 0, 0.8, 0.8, self.sT.eSpr, self.sT.eSpr:getWidth(), self.sT.eSpr:getHeight(), self.enemyInstructions, self)
-			local enemyRight = Enemy.new(spawnX2, spawnY2, 0, 0.8, 0.8, self.sT.eSpr, self.sT.eSpr:getWidth(), self.sT.eSpr:getHeight(), self.enemyInstructions, self)
+			local enemyLeft = Enemy.new(spawnX1, spawnY1, 0, 0.8, 0.8, 64, 64, self.enemyInstructions, self)
+			local enemyRight = Enemy.new(spawnX2, spawnY2, 0, 0.8, 0.8, 64, 64, self.enemyInstructions, self)
 
 			-- Treat current position as supposed center and align accordingly
 			enemyLeft:centerToPos()

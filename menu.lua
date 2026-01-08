@@ -21,9 +21,11 @@ function Menu:draw()
 	for _, b in ipairs(self.buttonTable) do
 		b:draw()
 	end
+end
 
-	-- Draw controls text
-	self.host:printXCenteredText("WASD to move\nSHIFT for speed\nSPACE to shoot", love.graphics.getWidth()/2, love.graphics.getHeight()/2 - 300, 3)
+function Menu:printXCenteredText(text, x, y, scale)
+	local tX = x - love.graphics.getFont():getWidth(text)*scale/2
+	love.graphics.print(text, tX, y, 0, scale, scale)
 end
 
 function Menu:mousepressed(mx, my, button)
@@ -37,7 +39,9 @@ function Menu:mousepressed(mx, my, button)
 end
 
 function Menu:keypressed(key)
-	self.buttonTable[1].func() -- If any key is pressed. A placeholder solution until more complicated menu exists
+	if self.buttonTable[1] then
+		self.buttonTable[1].func() -- If any key is pressed, activate first button. A placeholder solution until more complicated menu exists
+	end
 end
 
 return { Menu = Menu}

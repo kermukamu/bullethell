@@ -7,7 +7,7 @@ Cool3d = ccool3d.Cool3d
 local Player = {}
 Player.__index = Player
 
-function Player.new(x, y, r, sx, sy, sprW, sprH, level)
+function Player.new(x, y, r, sx, sy, w, h, level)
 	local self = setmetatable({}, Player)
 	self.level = level
 
@@ -16,9 +16,8 @@ function Player.new(x, y, r, sx, sy, sprW, sprH, level)
 	self.r = r or 0
 	self.sx = sx or 1
 	self.sy = sy or 1
-	self.sprite = level.sT.pSpr
-	self.w = sprW or 128
-	self.h = sprH or 128
+	self.w = w or 128
+	self.h = h or 128
 	self.health = 100
 	self.dashCooldown = 0
 	self.shotCooldown = 0
@@ -75,7 +74,6 @@ function Player:update(dt)
 end
 
 function Player:draw()
-    --love.graphics.draw(self.sprite, self.x, self.y, self.r, self.sx, self.sy)
     love.graphics.setColor(math.sin(self.cShift),1,0,self.opaque)
     love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)
     love.graphics.setColor(1,1,1,1)
@@ -105,11 +103,9 @@ end
 function Player:shoot()
 	if (self.shotCooldown <= 0) then
 		self.shotCooldown = self.maxShotCooldown
-		local sprite = self.level.sT.pShotSpr
-		local spriteW = sprite:getWidth()
-		local spriteH = sprite:getHeight()
 		local scale = 0.6
-		local shot = Projectile.new(self:getXCenter() - (spriteW * scale / 2), self.y - 10, 0, scale, scale, self.level.sT.pShotSpr, spriteW, spriteH, self.shotDamage, true, false)
+		local size = 32
+		local shot = Projectile.new(self:getXCenter() - (size * scale / 2), self.y - 10, 0, scale, scale, size, size, self.shotDamage, true, false)
 		shot.ySpeed = -6000
 		table.insert(self.level.playerProjectileTable, shot)
 	end
