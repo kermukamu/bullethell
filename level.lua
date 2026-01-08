@@ -27,7 +27,8 @@ function Level.new(debugmode, host)
 	self.isOver = false
 	self.timer = 0
 	self.enemyTable = {}
-	self.projectileTable = {}
+	self.enemyProjectileTable = {}
+	self.playerProjectileTable = {}
 
 	-- Load level sprites
 	if self.debugmode then
@@ -44,38 +45,90 @@ function Level.new(debugmode, host)
 	end
 	local px = love.graphics.getWidth() / 2
 	local py = love.graphics.getHeight() - 80
-	self.player = Player.new(px, py, 0, 0.5, 0.5, self.sT.pSpr:getWidth(), self.sT.pSpr:getHeight(), self)
+	self.player = Player.new(px, py, 0, 0.2, 0.2, self.sT.pSpr:getWidth(), self.sT.pSpr:getHeight(), self)
 	self.player:centerToPos()
 
-	-- Add test enemies
-	if self.debugmode then
-		print("Setting up test enemies for level")
-		io.stdout:flush()
-	end
-	self.enemyInstructions = self:readFile('instructions/enemy1.str.txt')
+	-- Read enemy instructions
+	self.enemyInstructions = self:readFile('instructions/enemy0.str.txt')
 	if self.enemyInstructions and self.debugmode then
 		print("Enemy instructions successfully read!\n")
 		io.stdout:flush()
 	end
-	table.insert(self.enemyTable, Enemy.new(love.graphics.getWidth() / 2 - 100, 50, 0, 0.8, 0.8, self.sT.eSpr, self.sT.eSpr:getWidth(), self.sT.eSpr:getHeight(), self.enemyInstructions, self))
-	table.insert(self.enemyTable, Enemy.new(love.graphics.getWidth() / 2 + 100, 50, 0, 0.8, 0.8, self.sT.eSpr, self.sT.eSpr:getWidth(), self.sT.eSpr:getHeight(), self.enemyInstructions, self))
-	self.enemyTable[1]:centerToPos()
-	self.enemyTable[2]:centerToPos()
-	self.enemyTable[2].instructions.mag = -1
+	self.originalSpawnInterval = 10
+	self.enemySpawnInterval = self.originalSpawnInterval
+	self.enemySpawnCount = 1 -- Actual spawned amount is twice due to mirroring
+	self.spawnTimer = 0
+	self.endingTextWait = 2
 	return self
 end
 
 function Level:update(dt)
-	self.timer = self.timer + 1 * dt
+	self.timer = self.timer + dt -- Will be used to count score
 	if (not self.isOver) then self.player:update(dt) end
-	if love.keyboard.isDown("space") then self.player:shoot() end
+
+	-- Check if enemies need to be spawned
+	if self.spawnTimer <= 0 then
+		for i=1, self.enemySpawnCount, 1 do
+
+			-- Spawn off screen
+			local spawnX1 = -50
+			local spawnX2 = love.graphics.getWidth() + 50
+
+			-- Set random y value for spawn location
+			local spawnY1 = math.random(100, love.graphics.getHeight() / 2)
+			local spawnY2 = math.random(100, love.graphics.getHeight() / 2)
+
+			local enemyLeft = Enemy.new(spawnX1, spawnY1, 0, 0.8, 0.8, self.sT.eSpr, self.sT.eSpr:getWidth(), self.sT.eSpr:getHeight(), self.enemyInstructions, self)
+			local enemyRight = Enemy.new(spawnX2, spawnY2, 0, 0.8, 0.8, self.sT.eSpr, self.sT.eSpr:getWidth(), self.sT.eSpr:getHeight(), self.enemyInstructions, self)
+
+			-- Treat current position as supposed center and align accordingly
+			enemyLeft:centerToPos()
+			enemyRight:centerToPos()
+
+			-- Mirror directions in instructions
+			enemyLeft.instructions.mag = 1
+			enemyRight.instructions.mag = -1
+
+			table.insert(self.enemyTable, enemyLeft)
+			table.insert(self.enemyTable, enemyRight)
+		end
+
+		-- Reduce interval after every spawning
+		self.enemySpawnInterval = self.enemySpawnInterval - 1
+
+		-- If interval is 5, increase spawn count instead and reset interval to original
+		if self.enemySpawnInterval <= 5 then
+			self.enemySpawnCount = self.enemySpawnCount + 1
+			self.enemySpawnInterval = self.originalSpawnInterval
+		end
+
+		self.spawnTimer = self.enemySpawnInterval
+	end
+	self.spawnTimer = self.spawnTimer - dt
 
 	-- Update projectiles
-	for i = #self.projectileTable, 1, -1 do
-		local p = self.projectileTable[i]
+	for i = #self.enemyProjectileTable, 1, -1 do
+		local p = self.enemyProjectileTable[i]
 		p:update(dt)
 		if p:shouldDestroy() then
-        	table.remove(self.projectileTable, i)
+        	table.remove(self.enemyProjectileTable, i)
+    	end
+    end
+
+    for i = #self.playerProjectileTable, 1, -1 do
+		local p = self.playerProjectileTable[i]
+		p:update(dt)
+		if p:shouldDestroy() then
+        	table.remove(self.playerProjectileTable, i)
+    	end
+    end
+
+    -- Run collision checks between player projectiles and enemy projectiles
+    for _, pp in ipairs(self.playerProjectileTable) do
+    	for _, ep in ipairs(self.enemyProjectileTable) do
+    		if pp.affectEnemy and pp:collidesWith(ep) then
+    			ep.health = 0
+    		end
     	end
     end
 
@@ -83,7 +136,6 @@ function Level:update(dt)
 	for i =#self.enemyTable, 1, -1 do
 		local e = self.enemyTable[i]
 		e:update(dt)
-		e:shoot(false)
 		if e:shouldDestroy() then
 			print("Deleting enemy")
 			io.stdout:flush()
@@ -91,8 +143,13 @@ function Level:update(dt)
 		end
 	end
 
-	-- Check if player is alivea 
+	-- Check if player is alive
 	if self.player:shouldDestroy() then self.isOver = true end
+
+	-- Restart game text appearance timer
+	if self.isOver then
+		self.endingTextWait = math.max(0, self.endingTextWait - dt)
+	end
 end
 
 function Level:draw()
@@ -102,7 +159,11 @@ function Level:draw()
 	end
 
 	-- Draw projectiles
-	for _, p in ipairs(self.projectileTable) do
+	for _, p in ipairs(self.enemyProjectileTable) do
+		p:draw()
+    end
+
+    for _, p in ipairs(self.playerProjectileTable) do
 		p:draw()
     end
 
@@ -112,7 +173,12 @@ function Level:draw()
     end
 
     -- Draw end text
-    if self.isOver then love.graphics.print("GAME OVER!", love.graphics.getWidth()/2 -150, love.graphics.getHeight()/2, 0, 5, 5) end
+    if self.isOver then
+    	self.host:printXCenteredText("GAME OVER!", love.graphics.getWidth()/2, love.graphics.getHeight()/2 - 100, 5)
+    	if self.endingTextWait <= 0 then
+    		self.host:printXCenteredText("Press ENTER to exit to menu", love.graphics.getWidth()/2, love.graphics.getHeight()/2 + 100, 5)
+    	end
+	end
 end
 
 function Level:readFile(filename)
@@ -131,8 +197,9 @@ function Level:mousepressed(mx, my, button)
 end
 
 function Level:keypressed(key)
-	if key == "c" and love.keyboard.isDown("d") then self.player:dash(true) end
-  	if key == "c" and love.keyboard.isDown("a") then self.player:dash(false) end
+	-- if key == "lshift" and love.keyboard.isDown("d") then self.player:dash(true) end
+  	-- if key == "lshift" and love.keyboard.isDown("a") then self.player:dash(false) end
+  	if self.isOver and key == "return" then self.host:setupMainMenu() end
 end
 
 return { Level = Level}
