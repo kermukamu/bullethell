@@ -19,32 +19,32 @@ function Enemy.new(x, y, r, sx, sy, spr, sprW, sprH, instructions, level)
 	self.h = sprH or 128
 	self.health = 100
 	self.shotDamage = 25
-	self.shotCooldown = 0
 	self.hurtCooldown = 0
-	self.maxShotCooldown = 1
 	self.maxHurtCooldown = 0.2
 	self.xSpeed = 0
 	self.ySpeed = 0
 	self.drag = 0
 	self.maxMoveSpeed = 500
 	self.instructions = Instructions.new(instructions, self)
-	self.autoShoot = false
 	self.level = level
+	self.cShift = 0
+	self.opaque = 1
 	return self
 end
 
 function Enemy:update(dt)
-    self.shotCooldown = math.max(0, self.shotCooldown - dt)
     self.hurtCooldown = math.max(0, self.hurtCooldown - dt)
     if self.instructions then
     	self.instructions:callInstructions(dt)
     end
     self:posUpdate(dt)
-    if self.autoShoot then self:shoot(false) end
 
-    -- Run collision checks
+    -- Update hurt visual effect
+    if self.hurtCooldown > 0 then self.opaque = 1-(self.hurtCooldown/self.maxHurtCooldown) end
+
+    -- Run collision checks between player projectiles and self
     if self.hurtCooldown <= 0 then
-    	for _, p in ipairs(self.level.projectileTable) do
+    	for _, p in ipairs(self.level.playerProjectileTable) do
 			if p.affectEnemy and p:collidesWith(self) then
 				p.health = p.health - 1
 				self.health = self.health - p.damage
@@ -61,23 +61,23 @@ function Enemy:update(dt)
 end
 
 function Enemy:draw()
-	if self.hurtCooldown > 0 then love.graphics.setColor(1,1,1,1-(self.hurtCooldown/self.maxHurtCooldown)) end
-    love.graphics.draw(self.sprite, self.x, self.y, self.r, self.sx, self.sy)
+    -- love.graphics.draw(self.sprite, self.x, self.y, self.r, self.sx, self.sy)
+    love.graphics.setColor(1,0,math.sin(self.cShift),self.opaque)
+    love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)
     love.graphics.setColor(1,1,1,1)
 end
 
-function Enemy:shoot(override)
-	if not self.level.projectileTable then return false end
-	if (self.shotCooldown <= 0 or override) then
-		self.shotCooldown = self.maxShotCooldown
-		local sprite = self.level.sT.eShotSpr
-		local spriteW = sprite:getWidth()
-		local spriteH = sprite:getHeight()
-		local scale = 0.6
-		local shot = Projectile.new(self:getXCenter() - (spriteW * scale / 2), self.y + 10, 0, scale, scale, self.level.sT.eShotSpr, spriteW, spriteH, self.shotDamage, false, true)
-		shot.ySpeed = 1000
-		table.insert(self.level.projectileTable, shot)
-	end
+function Enemy:shoot(angleDeg, speed, size)
+	if not self.level.enemyProjectileTable then return false end
+
+	local sprite = self.level.sT.eShotSpr
+	local spriteW = sprite:getWidth()
+	local spriteH = sprite:getHeight()
+	local scale = size
+	local shot = Projectile.new(self:getXCenter() - (spriteW * scale / 2), self.y + 10, 0, scale, scale, self.level.sT.eShotSpr, spriteW, spriteH, self.shotDamage, false, true)
+	shot.xSpeed = math.sin(math.rad(angleDeg)) * speed + self.xSpeed
+	shot.ySpeed = math.cos(math.rad(angleDeg)) * speed + self.ySpeed
+	table.insert(self.level.enemyProjectileTable, shot)
 end
 
 function Enemy:getXCenter()
