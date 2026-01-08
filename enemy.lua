@@ -22,6 +22,8 @@ function Enemy.new(x, y, r, sx, sy, w, h, instructions, level)
 	self.maxHurtCooldown = 0.2
 	self.xSpeed = 0
 	self.ySpeed = 0
+	self.xSpeedMult = 1
+	self.ySpeedMult = 1
 	self.drag = 0
 	self.maxMoveSpeed = 500
 	self.instructions = Instructions.new(instructions, self)
@@ -69,8 +71,8 @@ function Enemy:shoot(angleDeg, speed, scale)
 	if not self.level.enemyProjectileTable then return false end
 	local size = 32
 	local shot = Projectile.new(self:getXCenter() - (size * scale / 2), self.y + 10, 0, scale, scale, size, size, self.shotDamage, false, true)
-	shot.xSpeed = math.sin(math.rad(angleDeg)) * speed + self.xSpeed
-	shot.ySpeed = math.cos(math.rad(angleDeg)) * speed + self.ySpeed
+	shot.xSpeed = math.sin(math.rad(angleDeg)) * speed --+ self.xSpeedMult * self.xSpeed
+	shot.ySpeed = math.cos(math.rad(angleDeg)) * speed --+ self.ySpeedMult * self.ySpeed
 	table.insert(self.level.enemyProjectileTable, shot)
 end
 
@@ -99,8 +101,8 @@ end
 
 function Enemy:posUpdate(dt)
 	-- Update Enemy position
-	self.x = self.x + self.xSpeed * dt
-	self.y = self.y + self.ySpeed * dt
+	self.x = self.x + self.xSpeedMult * self.xSpeed * dt
+	self.y = self.y + self.ySpeedMult * self.ySpeed * dt
 
 	-- Slow down Enemy movement
 	local damping = math.exp(-self.drag * dt)
