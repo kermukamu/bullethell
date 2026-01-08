@@ -27,12 +27,14 @@ function Player.new(x, y, r, sx, sy, sprW, sprH, level)
 	self.ySpeed = 0
 	self.dashSpeed = 0
 	self.drag = 1000
-	self.maxMoveSpeed = 500
-	self.maxDashSpeed = 4000
+	self.maxMoveSpeed = 200
+	self.maxDashSpeed = 50000
 	self.dashDistance = 150
 	self.maxShotCooldown = 0.1
 	self.maxHurtCooldown = 1
 	self.shotDamage = 30
+	self.cShift = 0
+	self.opaque = 1
 
 	self.healthBarVisual = Cool3d.new(self.level.debugmode, 100, love.graphics.getHeight() - 100, 250)
 	self.healthBarVisual:readFile("3d/diamond.txt")
@@ -46,13 +48,20 @@ function Player:update(dt)
     self:movement()
     self:posUpdate(dt)
 
-    -- Run collision checks between projectiles and player
+    -- Check if shooting key is pressed
+    if love.keyboard.isDown("space") then self:shoot() end
+
+    -- Update hurt visual effect
+    if self.hurtCooldown > 0 then self.opaque = 1-(self.hurtCooldown/self.maxHurtCooldown) end
+
+    -- Run collision checks between enemy projectiles and self
     if self.hurtCooldown <= 0 then
-    	for _, p in ipairs(self.level.projectileTable) do
+    	for _, p in ipairs(self.level.enemyProjectileTable) do
 			if p.affectPlayer and p:collidesWith(self) then
 				p.health = p.health - 1
 				self.health = self.health - p.damage
 				self.hurtCooldown = self.maxHurtCooldown
+				break
 			end
     	end
     end
@@ -66,8 +75,9 @@ function Player:update(dt)
 end
 
 function Player:draw()
-	if self.hurtCooldown > 0 then love.graphics.setColor(1,1,1,1-(self.hurtCooldown/self.maxHurtCooldown)) end
-    love.graphics.draw(self.sprite, self.x, self.y, self.r, self.sx, self.sy)
+    --love.graphics.draw(self.sprite, self.x, self.y, self.r, self.sx, self.sy)
+    love.graphics.setColor(math.sin(self.cShift),1,0,self.opaque)
+    love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)
     love.graphics.setColor(1,1,1,1)
 
     for i=1, self.health, 25 do
@@ -82,12 +92,10 @@ function Player:dash(direction)
 	if (self.dashCooldown <= 0) then
 		self.dashCooldown = 0.5
     	if direction then
-      		--self.dashSpeed = self.maxDashSpeed
-      		self.x = self.x + self.dashDistance
+      		self.dashSpeed = self.maxDashSpeed
       		print("Dashing right")
     	else
-      		--self.dashSpeed = -self.maxDashSpeed
-      		self.x = self.x - self.dashDistance
+      		self.dashSpeed = -self.maxDashSpeed
       		print("Dashing left")
     	end
     	io.stdout:flush()
@@ -103,28 +111,30 @@ function Player:shoot()
 		local scale = 0.6
 		local shot = Projectile.new(self:getXCenter() - (spriteW * scale / 2), self.y - 10, 0, scale, scale, self.level.sT.pShotSpr, spriteW, spriteH, self.shotDamage, true, false)
 		shot.ySpeed = -6000
-		table.insert(self.level.projectileTable, shot)
+		table.insert(self.level.playerProjectileTable, shot)
 	end
 end
 
 function Player:movement()
 	local hor = 0 
 	local vert = 0
+	local moveSpeed = self.maxMoveSpeed
 
     -- Handle keyboard input
     if love.keyboard.isDown("d") then hor = 1 end
     if love.keyboard.isDown("a") then hor = -1 end
     if love.keyboard.isDown("s") then vert = 1 end
     if love.keyboard.isDown("w") then vert = -1 end
+    if love.keyboard.isDown("lshift") then moveSpeed = self.maxMoveSpeed * 2 end
 
     -- Movement
     if hor ~= 0 and vert ~= 0 then -- Handle diagonal movement
-    	self.xSpeed = hor * 0.707 * self.maxMoveSpeed
-    	self.ySpeed = vert * 0.707 * self.maxMoveSpeed
+    	self.xSpeed = hor * 0.707 * moveSpeed
+    	self.ySpeed = vert * 0.707 * moveSpeed
     elseif hor ~= 0 then
-    	self.xSpeed = hor * self.maxMoveSpeed
+    	self.xSpeed = hor * moveSpeed
     elseif vert ~= 0 then
-    	self.ySpeed = vert * self.maxMoveSpeed
+    	self.ySpeed = vert * moveSpeed
     end
 end
 
@@ -153,8 +163,15 @@ end
 
 function Player:posUpdate(dt)
 	-- Update player position
-	self.x = self.x + (self.xSpeed + self.dashSpeed) * dt
-	self.y = self.y + self.ySpeed * dt
+	local newX = self.x + (self.xSpeed + self.dashSpeed) * dt
+	local newY = self.y + self.ySpeed * dt
+	newX = math.max(0, newX)
+	newY = math.max(0, newY)
+	newX = math.min(love.graphics.getWidth() - self:scaledW(), newX)
+	newY = math.min(love.graphics.getHeight() - self:scaledH(), newY)
+
+	self.x = newX
+	self.y = newY
 
 	-- Slow down player movement
 	local damping = math.exp(-self.drag * dt)
