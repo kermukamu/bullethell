@@ -16,6 +16,7 @@ function Projectile.new(x, y, r, sx, sy, spr, sprW, sprH, damage, affectEnemy, a
 	self.damage = damage or 0
 	self.xSpeed = 0
 	self.ySpeed = 0
+	self.cShift = 0
 	self.affectEnemy = affectEnemy or false
 	self.affectPlayer = affectPlayer or false
 	return self
@@ -23,6 +24,7 @@ end
 
 function Projectile:update(dt)
     self:posUpdate(dt)
+    self.cShift = self.cShift + (dt * 0.5)
 
     self._debugTimer = (self._debugTimer or 0) + dt
     if self._debugTimer >= 0.5 then
@@ -38,7 +40,18 @@ function Projectile:posUpdate(dt)
 end
 
 function Projectile:draw()
-    love.graphics.draw(self.sprite, self.x, self.y, self.r, self.sx, self.sy)
+    -- love.graphics.draw(self.sprite, self.x, self.y, self.r, self.sx, self.sy)
+    if self.affectPlayer then
+    	love.graphics.setColor(1,0,math.sin(self.cShift),1)
+    	love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)
+    	love.graphics.setColor(1,1,1,1)
+    end
+    if self.affectEnemy then
+        love.graphics.setColor(math.sin(self.cShift),1,0,1)
+    	love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)
+    	love.graphics.setColor(1,1,1,1)
+    end
+
 end
 
 function Projectile:collidesWith(object)
