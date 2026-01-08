@@ -167,9 +167,9 @@ function Level:draw()
 
     -- Draw end text
     if self.isOver then
-    	self.host:printXCenteredText("GAME OVER!", love.graphics.getWidth()/2, love.graphics.getHeight()/2 - 100, 5)
+    	self:printXCenteredText("GAME OVER!", love.graphics.getWidth()/2, love.graphics.getHeight()/2 - 100, 5)
     	if self.endingTextWait <= 0 then
-    		self.host:printXCenteredText("Press ENTER to exit to menu", love.graphics.getWidth()/2, love.graphics.getHeight()/2 + 100, 5)
+    		self:printXCenteredText("Press ENTER to exit to menu", love.graphics.getWidth()/2, love.graphics.getHeight()/2 + 100, 5)
     	end
 	end
 end
@@ -193,6 +193,11 @@ function Level:keypressed(key)
 	-- if key == "lshift" and love.keyboard.isDown("d") then self.player:dash(true) end
   	-- if key == "lshift" and love.keyboard.isDown("a") then self.player:dash(false) end
   	if self.isOver and key == "return" then self.host:setupMainMenu() end
+end
+
+function Level:printXCenteredText(text, x, y, scale)
+	local tX = x - love.graphics.getFont():getWidth(text)*scale/2
+	love.graphics.print(text, tX, y, 0, scale, scale)
 end
 
 return { Level = Level}
