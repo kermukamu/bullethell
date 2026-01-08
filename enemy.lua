@@ -50,6 +50,7 @@ function Enemy:update(dt)
 				p.health = p.health - 1
 				self.health = self.health - p.damage
 				self.hurtCooldown = self.maxHurtCooldown
+				self.level.score = self.level.score + self.level.enemyHitScore
 			end
     	end
     end

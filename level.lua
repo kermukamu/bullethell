@@ -35,6 +35,12 @@ function Level.new(debugmode, host)
 	self.spawnTimer = 0
 	self.endingTextWait = 2
 
+	-- Scoring table
+	self.score = 0
+	self.timeScore = 1
+	self.projHitScore = 2
+	self.enemyHitScore = 15
+
 	-- Initialize player
 	if self.debugmode then
 		print("Setting up the player for level")
@@ -57,7 +63,10 @@ end
 
 function Level:update(dt)
 	self.timer = self.timer + dt -- Will be used to count score
-	if (not self.isOver) then self.player:update(dt) end
+	if not self.isOver then 
+		self.player:update(dt)
+		self.score = self.score + self.timeScore * dt
+	end
 
 	-- Check if enemies need to be spawned
 	if self.spawnTimer <= 0 then
@@ -133,6 +142,7 @@ function Level:update(dt)
     	for _, ep in ipairs(self.enemyProjectileTable) do
     		if pp.affectEnemy and pp:collidesWith(ep) then
     			ep.health = 0
+    			self.score = self.score + self.projHitScore
     		end
     	end
     end
@@ -158,9 +168,12 @@ function Level:update(dt)
 end
 
 function Level:draw()
-	if (not self.isOver) then 
+	if (not self.isOver) then
 		self.player:draw()
 		love.graphics.print(("x=%.1f y=%.1f\nvx=%.1f vy=%.1f"):format(self.player.x, self.player.y, self.player.xSpeed, self.player.ySpeed), 10, 10)
+
+		-- Draw score at top
+		self:printXCenteredText(("Score: %.0f"):format(self.score), love.graphics.getWidth()/2, 40, 1)
 	end
 
 	-- Draw projectiles
@@ -177,9 +190,10 @@ function Level:draw()
 		e:draw()
     end
 
-    -- Draw end text
+    -- Draw end texts
     if self.isOver then
     	self:printXCenteredText("GAME OVER!", love.graphics.getWidth()/2, love.graphics.getHeight()/2 - 100, 5)
+		self:printXCenteredText(("Score: %.0f"):format(self.score), love.graphics.getWidth()/2, love.graphics.getHeight()/2, 4)
     	if self.endingTextWait <= 0 then
     		self:printXCenteredText("Press ENTER to exit to menu", love.graphics.getWidth()/2, love.graphics.getHeight()/2 + 100, 5)
     	end
