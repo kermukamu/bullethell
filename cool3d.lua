@@ -40,7 +40,6 @@ function Cool3d:readFile(filename)
 		table.insert(self.points, pointParts)
 		table.insert(self.lines, lineParts)
 	end
-	self:printData()
 end
 
 function Cool3d:project(xyz)
@@ -122,35 +121,5 @@ function Cool3d:draw()
         end
     end
 end
-
-function Cool3d:printData()
-    print("=== Cool3d Data ===")
-    print("Total points:", #self.points)
-
-    for i, p in ipairs(self.points) do
-        local x, y, z = p[1], p[2], p[3]
-
-        io.write(string.format(
-            "Point %d: x=%.3f y=%.3f z=%.3f",
-            i, x or 0, y or 0, z or 0
-        ))
-
-        local links = self.lines[i]
-        if links and #links > 0 then
-            io.write(" | connects to: ")
-            for j, idx in ipairs(links) do
-                io.write(idx)
-                if j < #links then io.write(", ") end
-            end
-        else
-            io.write(" | connects to: (none)")
-        end
-
-        io.write("\n")
-    end
-
-    print("=====================")
-end
-
 
 return { Cool3d = Cool3d}
