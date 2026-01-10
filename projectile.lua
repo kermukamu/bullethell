@@ -4,6 +4,8 @@ Projectile.__index = Projectile
 
 function Projectile.new(x, y, r, sx, sy, w, h, damage, affectEnemy, affectPlayer)
 	local self = setmetatable({}, Projectile)
+
+	-- Position and geometry
 	self.x = x or 0
 	self.y = y or 0
 	self.r = r or 0
@@ -11,25 +13,25 @@ function Projectile.new(x, y, r, sx, sy, w, h, damage, affectEnemy, affectPlayer
 	self.sy = sy or 0.2
 	self.w = w or 10
 	self.h = h or 10
-	self.health = 1
-	self.damage = damage or 0
+
+	-- Movement
 	self.xSpeed = 0
 	self.ySpeed = 0
-	self.cShift = 0
+
+	-- Effect
+	self.damage = damage or 0
 	self.affectEnemy = affectEnemy or false
 	self.affectPlayer = affectPlayer or false
+
+	-- Other
+	self.health = 1
+	self.cShift = 0
 	return self
 end
 
 function Projectile:update(dt)
     self:posUpdate(dt)
     self.cShift = self.cShift + (dt * 0.5)
-
-    self._debugTimer = (self._debugTimer or 0) + dt
-    if self._debugTimer >= 0.5 then
-        self._debugTimer = 0
-        --self:printStatus()
-    end
 end
 
 function Projectile:posUpdate(dt)
@@ -40,7 +42,9 @@ end
 
 function Projectile:draw()
     if self.affectPlayer then
-    	love.graphics.setColor(1,0,math.sin(self.cShift),1)
+    	local r, g, b = 1, 0, math.sin(self.cShift)
+    	local opaque = 1
+    	love.graphics.setColor(r, g, b, opaque)
     	love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)
     	love.graphics.setColor(1,1,1,1)
     end
@@ -86,13 +90,6 @@ end
 
 function Projectile:scaledH()
 	return self.h * self.sy
-end
-
-function Projectile:normDirectionTo(x, y)
-	local a = x - self:getXCenter()
-	local b = y - self:getYCenter()
-	local c = math.sqrt(a^2 + b^2)
-	return {a / c, b / c}
 end
 
 return { Projectile = Projectile}

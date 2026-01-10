@@ -113,16 +113,16 @@ function Level:update(dt)
 			enemyRight.instructions.mag = -1
 
 			-- Set xSpeed multiplier as a random constant between 0.8 and 1.5
-			local xSMultMin = 0.8
-			local xSMultMax = 1.5
-			enemyLeft.xSpeedMult = xSMultMin + math.random() * (xSMultMax - xSMultMin)
-			enemyRight.xSpeedMult = xSMultMin + math.random() * (xSMultMax - xSMultMin)
+			local xSpeedMultMin = 0.8
+			local xSpeedMultMax = 1.5
+			enemyLeft.xSpeedMult = xSpeedMultMin + math.random() * (xSpeedMultMax - xSpeedMultMin)
+			enemyRight.xSpeedMult = xSpeedMultMin + math.random() * (xSpeedMultMax - xSpeedMultMin)
 
 			-- Set ySpeed multiplier as a random constant between -1 and 1
-			local ySMultMin = -1
-			local ySMultMax = 1
-			enemyLeft.ySpeedMult = ySMultMin + math.random() * (ySMultMax - ySMultMin)
-			enemyRight.ySpeedMult = ySMultMin + math.random() * (ySMultMax - ySMultMin)
+			local ySpeedMultMin = -1
+			local ySpeedMultMax = 1
+			enemyLeft.ySpeedMult = ySpeedMultMin + math.random() * (ySpeedMultMax - ySpeedMultMin)
+			enemyRight.ySpeedMult = ySpeedMultMin + math.random() * (ySpeedMultMax - ySpeedMultMin)
 
 			table.insert(self.enemyTable, enemyLeft)
 			table.insert(self.enemyTable, enemyRight)

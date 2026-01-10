@@ -54,12 +54,6 @@ function Enemy:update(dt)
 			end
     	end
     end
-
-    self._debugTimer = (self._debugTimer or 0) + dt
-    if self._debugTimer >= 0.5 then
-        self._debugTimer = 0
-        --self:printStatus()
-    end
 end
 
 function Enemy:draw()

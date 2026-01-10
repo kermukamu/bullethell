@@ -36,6 +36,8 @@ function Player.new(x, y, r, sx, sy, w, h, level)
 	self.maxShotCooldown = 0.1
 	self.shotCooldown = 0
 	self.shotDamage = 30
+	self.shotSize = 32
+	self.shotScale = 0.6
 
 	-- Visuals
 	self.cShift = 0
@@ -77,8 +79,8 @@ function Player:update(dt)
     -- Update hurt visual effect
     if self.hurtCooldown > 0 then self.opaque = 1-(self.hurtCooldown/self.maxHurtCooldown) end
 
- 	-- Update dt in health bar visuals for synchronization
-	self.healthBarVisual.dt = dt
+ 	-- Update healthbar
+	self.healthBarVisual:update(dt)
 end
 
 function Player:draw()
@@ -102,16 +104,13 @@ end
 function Player:shoot()
 	if (self.shotCooldown <= 0) then
 		self.shotCooldown = self.maxShotCooldown
-		local size = 32
-		local scale = 0.6
-		local x = self:getXCenter() - (size * scale / 2)
+		local x = self:getXCenter() - (self.shotSize * self.shotScale / 2)
 		local y = self.y - 10
 		local orientation = 0
-		local damage = self.shotDamage
 		local affectEnemy = true
 		local affectPlayer = false
-		local shot = Projectile.new(x, y, orientation, scale, scale, size, size,
-				damage, affectEnemy, affectPlayer)
+		local shot = Projectile.new(x, y, orientation, self.shotScale, self.shotScale, self.shotSize, self.shotSize,
+				shotDamage, affectEnemy, affectPlayer)
 		shot.ySpeed = -6000
 		table.insert(self.level.playerProjectileTable, shot)
 	end
@@ -164,18 +163,13 @@ function Player:centerToPos()
 end
 
 function Player:posUpdate(dt)
-	-- Update player position
-	local newX = self.x + self.xSpeed * dt
-	local newY = self.y + self.ySpeed * dt
-	newX = math.max(0, newX)
-	newY = math.max(0, newY)
-	newX = math.min(love.graphics.getWidth() - self:scaledW(), newX)
-	newY = math.min(love.graphics.getHeight() - self:scaledH(), newY)
+	-- Prevent position from being outside screen
+	local minXBound, maxXBound = 0, love.graphics.getWidth() - self:scaledW()
+	local minYBound, maxYBound = 0, love.graphics.getHeight() - self:scaledH()
+	self.x = math.min(maxXBound, math.max(minXBound, self.x + self.xSpeed * dt))
+	self.y = math.min(maxYBound, math.max(minYBound, self.y + self.ySpeed * dt))
 
-	self.x = newX
-	self.y = newY
-
-	-- Slow down player movement
+	-- Slow down player speed
 	local damping = math.exp(-self.drag * dt)
     self.xSpeed = self.xSpeed * damping
     self.ySpeed = self.ySpeed * damping
@@ -186,7 +180,6 @@ function Player:posUpdate(dt)
 end
 
 function Player:shouldDestroy()
-	-- 0 HP
 	if self.health <= 0 then return true end
 	return false
 end

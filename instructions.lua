@@ -43,11 +43,14 @@ function Instructions:readInstruction(instruction)
 	end
 
 	--- These actions will pass false to caller either due to end or wait
+
+	-- end
 	if parts[1] == "end" then 
 		self.ind = 1
 		return false
 	end
 
+	-- wait [time in ms]
 	if parts[1] == "wait" then
 		self:commandIntegrity(tonumber(parts[2]))
 		self.wait = tonumber(parts[2]) / 1000
@@ -56,30 +59,35 @@ function Instructions:readInstruction(instruction)
 	end
 
 	--- These actions will pass true to caller
+
+	-- goto [line number]
 	if parts[1] == "goto" then
 		self:commandIntegrity(tonumber(parts[2]))
 		self.ind = tonumber(parts[2])
 		return true
 	end
 
+	-- setXSpeed [speed]
 	if parts[1] == "setXSpeed" then 
 		self:commandIntegrity(tonumber(parts[2]))
 		self.host.xSpeed = tonumber(parts[2]) * self.mag
 		io.stdout:flush()
 	end
 
+	-- setYSpeed [speed]
 	if parts[1] == "setYSpeed" then 
 		self:commandIntegrity(tonumber(parts[2]))
 		self.host.ySpeed = tonumber(parts[2])
 		io.stdout:flush()
 	end
 
-
+	-- shoot [angle] [speed] [scale]
 	if parts[1] == "shoot" then
 		self:commandIntegrity(tonumber(parts[2]))
 		self:commandIntegrity(tonumber(parts[3]))
 		self:commandIntegrity(tonumber(parts[4]))
-		self.host:shoot(tonumber(parts[2]) * self.mag, tonumber(parts[3]), tonumber(parts[4]))
+		local angle, speed, scale = tonumber(parts[2]) * self.mag, tonumber(parts[3]), tonumber(parts[4])
+		self.host:shoot(angle, speed, scale)
 	end
 
 	self.ind = self.ind + 1
@@ -96,7 +104,8 @@ function Instructions:callInstructions(dt)
 	-- Call readInstruction() for every line until receiving false as return
 	local keepReading = true
 	while self.wait <= 0 and keepReading do
-		keepReading = self:readInstruction(self.instructionList[self.ind])
+		local instruction = self.instructionList[self.ind]
+		keepReading = self:readInstruction(instruction)
 	end
 end
 
