@@ -102,11 +102,11 @@ end
 function Player:shoot()
 	if (self.shotCooldown <= 0) then
 		self.shotCooldown = self.maxShotCooldown
+		local size = 32
+		local scale = 0.6
 		local x = self:getXCenter() - (size * scale / 2)
 		local y = self.y - 10
 		local orientation = 0
-		local scale = 0.6
-		local size = 32
 		local damage = self.shotDamage
 		local affectEnemy = true
 		local affectPlayer = false
