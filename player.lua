@@ -85,10 +85,8 @@ end
 
 function Player:draw()
 	-- Player coloring
-	local r = math.sin(self.cShift)
-	local g = 1
-	local b = 0
-    love.graphics.setColor(r,g,b,self.opaque)
+	local r, g, b = math.sin(self.cShift), 1, 0
+    love.graphics.setColor(r, g, b, self.opaque)
     love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)
     love.graphics.setColor(1,1,1,1) -- Set back to fully opaque white
 
@@ -104,13 +102,11 @@ end
 function Player:shoot()
 	if (self.shotCooldown <= 0) then
 		self.shotCooldown = self.maxShotCooldown
-		local x = self:getXCenter() - (self.shotSize * self.shotScale / 2)
-		local y = self.y - 10
+		local x, y = self:getXCenter() - (self.shotSize * self.shotScale / 2), self.y - 10
 		local orientation = 0
-		local affectEnemy = true
-		local affectPlayer = false
+		local affectEnemy, affectPlayer = true, false
 		local shot = Projectile.new(x, y, orientation, self.shotScale, self.shotScale, self.shotSize, self.shotSize,
-				shotDamage, affectEnemy, affectPlayer)
+				self.shotDamage, affectEnemy, affectPlayer)
 		shot.ySpeed = -6000
 		table.insert(self.level.playerProjectileTable, shot)
 	end
