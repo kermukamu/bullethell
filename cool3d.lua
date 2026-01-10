@@ -10,9 +10,8 @@ function Cool3d.new(debugmode, x2d, y2d, modelScale)
 	self.lines = {}
 	self.lineWidth = 1
 	self.dz = 1
-	self.dt = 0 -- Used for synchronizing drawing, gets updated in update()
 	self.angle = 0
-    self.rotSpeed = 0.5 -- Speed of rotation
+    self.rotSpeed = 1 -- Speed of rotation
     self.timer = 0
     self.zSpeed = 0.2 -- Speed of z variation
 
@@ -68,13 +67,13 @@ function Cool3d:rotate_xz(xyz, angle)
     return {x*c - z*s, y, x*s + z*c}
 end
 
-function Cool3d:draw()
-    self.timer = self.timer + 1 * self.dt
+function Cool3d:update(dt)
+    self.timer = self.timer + 1 * dt
     self.dz = math.sin(self.zSpeed * self.timer) + 3
+    self.angle = (self.angle + math.pi * self.rotSpeed * dt)
+end
 
-    -- animate rotation
-    self.angle = (self.angle + math.pi * self.rotSpeed * self.dt)
-
+function Cool3d:draw()
     love.graphics.setColor(1, 1, 1)
     love.graphics.setLineWidth(self.lineWidth or 1)
 
