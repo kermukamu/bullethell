@@ -12,23 +12,6 @@ function Instructions.new(instructionTable, host)
 	return self
 end
 
-function Instructions:printInstructions()
-  print("---- INSTRUCTION TABLE ----")
-
-  if not self.instructionTable or #self.instructionList == 0 then
-    print("(empty)")
-    print("---------------------------")
-    return
-  end
-
-  for i, line in ipairs(self.instructionList) do
-    print(string.format("%3d: %s", i, line))
-  end
-
-  print("---------------------------")
-  io.stdout:flush()
-end
-
 function Instructions:readInstruction(instruction)
 	-- Check if nil
 	if not instruction then

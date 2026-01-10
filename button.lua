@@ -21,8 +21,9 @@ function Button:draw()
 	local recXY = self:asCenter(self.centX, self.centY, self.w, self.h)
 	local textXY = self:asCenter(self.centX, self.centY, tWidth, tHeight)
 	local orientation = 0
+	local recType = "line"
 
-	love.graphics.rectangle("line", recXY[1], recXY[2], self.w, self.h)
+	love.graphics.rectangle(recType, recXY[1], recXY[2], self.w, self.h)
 	love.graphics.print(self.text, textXY[1], textXY[2], orientation, self.tScale, self.tScale)
 end
 

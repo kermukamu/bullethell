@@ -9,6 +9,9 @@ Enemy.__index = Enemy
 
 function Enemy.new(x, y, r, sx, sy, w, h, instructions, level)
 	local self = setmetatable({}, Enemy)
+	self.level = level
+
+	-- Position and dimensions
 	self.x = x or 0
 	self.y = y or 0
 	self.r = r or 0
@@ -16,20 +19,26 @@ function Enemy.new(x, y, r, sx, sy, w, h, instructions, level)
 	self.sy = sy or 1
 	self.w = w or 128
 	self.h = h or 128
-	self.health = 100
-	self.shotDamage = 25
-	self.hurtCooldown = 0
-	self.maxHurtCooldown = 0.2
+
+	-- Movement
 	self.xSpeed = 0
 	self.ySpeed = 0
+	self.drag = 0
 	self.xSpeedMult = 1
 	self.ySpeedMult = 1
-	self.drag = 0
 	self.maxMoveSpeed = 500
-	self.instructions = Instructions.new(instructions, self)
-	self.level = level
+
+	-- Health and taking damage
+	self.health = 100
+	self.hurtCooldown = 0
+	self.maxHurtCooldown = 0.2
+
+	-- Other
+	self.shotDamage = 25
+	self.shotSize = 32
 	self.cShift = 0
 	self.opaque = 1
+	self.instructions = Instructions.new(instructions, self)
 	return self
 end
 
@@ -57,15 +66,19 @@ function Enemy:update(dt)
 end
 
 function Enemy:draw()
-    love.graphics.setColor(1,0,math.sin(self.cShift),self.opaque)
-    love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)
+	local r, g, b = 1, 0, math.sin(self.cShift)
+    love.graphics.setColor(r, g, b, self.opaque)
+    love.graphics.rectangle( "fill", self.x, self.y, self.w * self.sx, self.h * self.sx)
     love.graphics.setColor(1,1,1,1)
 end
 
 function Enemy:shoot(angleDeg, speed, scale)
 	if not self.level.enemyProjectileTable then return false end
-	local size = 32
-	local shot = Projectile.new(self:getXCenter() - (size * scale / 2), self.y + 10, 0, scale, scale, size, size, self.shotDamage, false, true)
+	local x, y = self:getXCenter() - (self.shotSize * scale / 2), self.y + 10
+	local orientation = 0
+	local affectEnemy, affectPlayer = false, true
+	local shot = Projectile.new(x, y, orientation, scale, scale, self.shotSize, self.shotSize, self.shotDamage, 
+		affectEnemy, affectPlayer)
 	shot.xSpeed = math.sin(math.rad(angleDeg)) * speed --+ self.xSpeedMult * self.xSpeed
 	shot.ySpeed = math.cos(math.rad(angleDeg)) * speed --+ self.ySpeedMult * self.ySpeed
 	table.insert(self.level.enemyProjectileTable, shot)
@@ -75,7 +88,7 @@ function Enemy:getXCenter()
 	local retX = self.x + (self:scaledW() / 2)
 	return retX
 end
- 
+
 function Enemy:getYCenter()
 	local retY = self.y + (self:scaledH() / 2) 
 	return retY

@@ -11,7 +11,7 @@ function Player.new(x, y, r, sx, sy, w, h, level)
 	local self = setmetatable({}, Player)
 	self.level = level
 
-	-- Position and geometry
+	-- Position and dimensions
 	self.x = x or 0
 	self.y = y or 0
 	self.r = r or 0
@@ -106,7 +106,7 @@ function Player:shoot()
 		local orientation = 0
 		local affectEnemy, affectPlayer = true, false
 		local shot = Projectile.new(x, y, orientation, self.shotScale, self.shotScale, self.shotSize, self.shotSize,
-				self.shotDamage, affectEnemy, affectPlayer)
+			self.shotDamage, affectEnemy, affectPlayer)
 		shot.ySpeed = -6000
 		table.insert(self.level.playerProjectileTable, shot)
 	end

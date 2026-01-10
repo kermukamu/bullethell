@@ -5,7 +5,7 @@ Projectile.__index = Projectile
 function Projectile.new(x, y, r, sx, sy, w, h, damage, affectEnemy, affectPlayer)
 	local self = setmetatable({}, Projectile)
 
-	-- Position and geometry
+	-- Position and dimensions
 	self.x = x or 0
 	self.y = y or 0
 	self.r = r or 0
@@ -49,7 +49,9 @@ function Projectile:draw()
     	love.graphics.setColor(1,1,1,1)
     end
     if self.affectEnemy then
-        love.graphics.setColor(math.sin(self.cShift),1,0,1)
+       	local r, g, b = math.sin(self.cShift), 1, 0
+    	local opaque = 1
+        love.graphics.setColor(r, g, b, opaque)
     	love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)
     	love.graphics.setColor(1,1,1,1)
     end
