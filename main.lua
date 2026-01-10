@@ -2,12 +2,17 @@ local cscene = require("scene")
 Scene = cscene.Scene
 
 function love.load()
-	love.window.setTitle("BulletHell")
-    love.window.setMode(1920, 1080)
-    love.graphics.setBackgroundColor(0, 0, 0, 0)
-    love.graphics.setDefaultFilter("nearest", "nearest")
     local debugmode = true
 
+	-- Set up window
+	local screenWidth = 1920
+	local screenHeight = 1080
+	love.window.setTitle("BulletHell")
+    love.window.setMode(screenWidth, screenHeight)
+    love.graphics.setBackgroundColor(0, 0, 0, 0)
+    love.graphics.setDefaultFilter("nearest", "nearest")
+
+    -- Start scene
 	scene = Scene.new(debugmode)
 	scene:setupMainMenu()
 end

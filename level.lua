@@ -23,16 +23,23 @@ function Level.new(debugmode, host)
 		io.stdout:flush()
 	end
 
-	self.isOver = false
-	self.timer = 0
+	self.isOver = false -- Whether game is lost or not
+
+	--Set up tables
 	self.enemyTable = {}
 	self.enemyProjectileTable = {}
 	self.playerProjectileTable = {}
 
+	-- General timer
+	self.timer = 0
+
+	-- Enemy spawning time control
 	self.originalSpawnInterval = 10
 	self.enemySpawnInterval = self.originalSpawnInterval
 	self.enemySpawnCount = 1 -- Actual spawned amount is twice due to mirroring
 	self.spawnTimer = 0
+
+	-- Countdown for the appearing of ending text
 	self.endingTextWait = 2
 
 	-- Scoring table
@@ -46,9 +53,13 @@ function Level.new(debugmode, host)
 		print("Setting up the player for level")
 		io.stdout:flush()
 	end
-	local px = love.graphics.getWidth() / 2
-	local py = love.graphics.getHeight() - 80
-	self.player = Player.new(px, py, 0, 0.2, 0.2, 128, 128, self)
+	local playerX = love.graphics.getWidth() / 2
+	local playerY = love.graphics.getHeight() - 80
+	local playerOrientation = 0
+	local playerScale = 0.2
+	local playerSize = 128
+	self.player = Player.new(playerX, playerY, playerOrientation, playerScale, 
+		playerScale, playerSize, playerSize, self)
 	self.player:centerToPos()
 
 	-- Read enemy instructions
@@ -62,7 +73,9 @@ function Level.new(debugmode, host)
 end
 
 function Level:update(dt)
-	self.timer = self.timer + dt -- Will be used to count score
+	self.timer = self.timer + dt
+
+	-- Check whether game has ended
 	if not self.isOver then 
 		self.player:update(dt)
 		self.score = self.score + self.timeScore * dt
@@ -80,8 +93,16 @@ function Level:update(dt)
 			local spawnY1 = math.random(-100, love.graphics.getHeight() / 2)
 			local spawnY2 = math.random(-100, love.graphics.getHeight() / 2)
 
-			local enemyLeft = Enemy.new(spawnX1, spawnY1, 0, 0.8, 0.8, 64, 64, self.enemyInstructions, self)
-			local enemyRight = Enemy.new(spawnX2, spawnY2, 0, 0.8, 0.8, 64, 64, self.enemyInstructions, self)
+			-- Geometry
+			local enemyOrientation = 0
+			local enemyScale = 0.8
+			local enemySize = 64
+
+			-- Inititialize enemies
+			local enemyLeft = Enemy.new(spawnX1, spawnY1, enemyOrientation, 
+				enemyScale, enemyScale, enemySize, enemySize, self.enemyInstructions, self)
+			local enemyRight = Enemy.new(spawnX2, spawnY2, enemyOrientation, 
+				enemyScale, enemyScale, enemySize, enemySize, self.enemyInstructions, self)
 
 			-- Treat current position as supposed center and align accordingly
 			enemyLeft:centerToPos()
@@ -170,10 +191,17 @@ end
 function Level:draw()
 	if (not self.isOver) then
 		self.player:draw()
-		love.graphics.print(("x=%.1f y=%.1f\nvx=%.1f vy=%.1f"):format(self.player.x, self.player.y, self.player.xSpeed, self.player.ySpeed), 10, 10)
 
-		-- Draw score at top
-		self:printXCenteredText(("Score: %.0f"):format(self.score), love.graphics.getWidth()/2, 40, 3)
+		if debugmode then
+			love.graphics.print(("x=%.1f y=%.1f\nvx=%.1f vy=%.1f"):format(self.player.x, 
+				self.player.y, self.player.xSpeed, self.player.ySpeed), 10, 10)
+		end
+
+		-- Draw score
+		local scoreX = love.graphics.getWidth()/2
+		local scoreY = 40
+		local scoreScale = 3
+		self:printXCenteredText(("Score: %.0f"):format(self.score), scoreX, scoreY, scoreScale)
 	end
 
 	-- Draw projectiles
@@ -190,12 +218,29 @@ function Level:draw()
 		e:draw()
     end
 
-    -- Draw end texts
+    -- Ending
     if self.isOver then
-    	self:printXCenteredText("GAME OVER!", love.graphics.getWidth()/2, love.graphics.getHeight()/2 - 100, 5)
-		self:printXCenteredText(("Score: %.0f"):format(self.score), love.graphics.getWidth()/2, love.graphics.getHeight()/2, 4)
+    	-- Draw game over text
+    	local gameOverText = "GAME OVER!"
+    	local gameOverTextCenterX = love.graphics.getWidth()/2
+    	local gameOverTextY = love.graphics.getHeight()/2 - 100
+    	local gameOverTextScale = 5
+    	self:printXCenteredText(gameOverText, gameOverTextCenterX, gameOverTextY, gameOverTextScale)
+
+    	-- Print final score
+    	local finalScoreText = ("Score: %.0f"):format(self.score)
+    	local finalScoreTextCenterX = love.graphics.getWidth()/2
+    	local finalScoreTextY = love.graphics.getHeight()/2
+    	local finalScoreTextScale = 4
+		self:printXCenteredText(finalScoreText, finalScoreTextCenterX, finalScoreTextY, finalScoreTextScale)
+
+		-- After a small moment, print instructions to return to menu
     	if self.endingTextWait <= 0 then
-    		self:printXCenteredText("Press ENTER to exit to menu", love.graphics.getWidth()/2, love.graphics.getHeight()/2 + 100, 5)
+    		local returnMenuText = "Press ENTER to return to main menu"
+    		local returnMenuTextCenterX = love.graphics.getWidth()/2
+    		local returnMenuTextY = love.graphics.getHeight()/2 + 100
+    		local returnMenuTextScale = 5
+    		self:printXCenteredText(returnMenuText, returnMenuTextCenterX, returnMenuTextY, returnMenuTextScale)
     	end
 	end
 end
@@ -216,14 +261,13 @@ function Level:mousepressed(mx, my, button)
 end
 
 function Level:keypressed(key)
-	-- if key == "lshift" and love.keyboard.isDown("d") then self.player:dash(true) end
-  	-- if key == "lshift" and love.keyboard.isDown("a") then self.player:dash(false) end
   	if self.isOver and key == "return" then self.host:setupMainMenu() end
 end
 
-function Level:printXCenteredText(text, x, y, scale)
-	local tX = x - love.graphics.getFont():getWidth(text)*scale/2
-	love.graphics.print(text, tX, y, 0, scale, scale)
+function Level:printXCenteredText(text, centerX, textY, scale)
+	local textX = centerX - love.graphics.getFont():getWidth(text) * scale/2
+	local orientation = 0
+	love.graphics.print(text, textX, textY, orientation, scale, scale)
 end
 
 return { Level = Level}

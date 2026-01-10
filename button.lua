@@ -20,9 +20,10 @@ function Button:draw()
 	local tHeight = love.graphics.getFont():getHeight() * self.tScale
 	local recXY = self:asCenter(self.centX, self.centY, self.w, self.h)
 	local textXY = self:asCenter(self.centX, self.centY, tWidth, tHeight)
+	local orientation = 0
 
-	love.graphics.rectangle("line", recXY[1], recXY[2], self.w, self.h, 10, 10)
-	love.graphics.print(self.text, textXY[1], textXY[2], 0, self.tScale, self.tScale)
+	love.graphics.rectangle("line", recXY[1], recXY[2], self.w, self.h)
+	love.graphics.print(self.text, textXY[1], textXY[2], orientation, self.tScale, self.tScale)
 end
 
 function Button:containsPoint(x, y)

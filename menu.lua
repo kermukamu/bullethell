@@ -23,9 +23,10 @@ function Menu:draw()
 	end
 end
 
-function Menu:printXCenteredText(text, x, y, scale)
-	local tX = x - love.graphics.getFont():getWidth(text)*scale/2
-	love.graphics.print(text, tX, y, 0, scale, scale)
+function Menu:printXCenteredText(text, centerX, textY, scale)
+	local textX = centerX - love.graphics.getFont():getWidth(text)*scale/2
+	local orientation = 0
+	love.graphics.print(text, textX, textY, orientation, scale, scale)
 end
 
 function Menu:mousepressed(mx, my, button)
@@ -40,7 +41,8 @@ end
 
 function Menu:keypressed(key)
 	if self.buttonTable[1] then
-		self.buttonTable[1].func() -- If any key is pressed, activate first button. A placeholder solution until more complicated menu exists
+		-- If any key is pressed, activate first button. A placeholder solution
+		self.buttonTable[1].func()
 	end
 end
 
