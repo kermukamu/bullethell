@@ -9,7 +9,7 @@ function love.load()
 	local screenHeight = 1080
 	love.window.setTitle("BulletHell")
     love.window.setMode(screenWidth, screenHeight)
-    love.graphics.setBackgroundColor(0, 0, 0, 0)
+    love.graphics.setBackgroundColor(0, 0, 0, 0) -- Black
     love.graphics.setDefaultFilter("nearest", "nearest")
 
     -- Start scene
