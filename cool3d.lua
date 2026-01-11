@@ -11,9 +11,9 @@ function Cool3d.new(debugmode, x2d, y2d, modelScale)
 	self.lineWidth = 1
 	self.dz = 1
 	self.angle = 0
-    self.rotSpeed = 1 -- Speed of rotation
+    self.rotSpeed = 1
     self.timer = 0
-    self.zSpeed = 0.2 -- Speed of z variation
+    self.zSpeed = 0.2
 
     self.x2d = x2d or 0
     self.y2d = y2d or 0
@@ -28,7 +28,7 @@ function Cool3d:readFile(filename)
 
 	--Separate lines
 	for line in contents:gmatch("[^\r\n]+") do
-		-- Separate each value in a line, form should be x1 y1 z1 i1 i2 i3 i4...\n (connected to 4 other points)
+		-- Separate each value in a line, form should be x1 y1 z1 i1 i2 i3 i4...\n
 		local pointParts = {}
 		local lineParts = {}
 		local i = 1
@@ -80,9 +80,8 @@ function Cool3d:draw()
     local cx, cy = self.x2d, self.y2d
     local scale = self.modelScale
 
-    -- Project all points once
-    local screen = {}   -- screen[i] = {x, y} or nil if not drawable
-    local zvals  = {}   -- keep z so we can cull points behind camera
+    local screen = {}
+    local zvals  = {}
 
     for i = 1, #self.points do
         local p = self:rotate_xz(self.points[i], self.angle)
@@ -92,7 +91,7 @@ function Cool3d:draw()
         zvals[i] = z
 
         if z and z > 0.001 then
-            local proj = self:project(p) -- {x/z, y/z}
+            local proj = self:project(p)
             screen[i] = { cx + proj[1] * scale, cy + proj[2] * scale }
         else
             screen[i] = nil
