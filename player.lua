@@ -28,6 +28,7 @@ function Player.new(x, y, r, sx, sy, w, h, level)
 	self.quickMoveMult = 2
 
 	-- Health and taking damage
+	self.maxHealth = 100
 	self.health = 100
 	self.maxHurtCooldown = 1
 	self.hurtCooldown = 0
@@ -80,6 +81,7 @@ function Player:update(dt)
     if self.hurtCooldown > 0 then self.opaque = 1-(self.hurtCooldown/self.maxHurtCooldown) end
 
  	-- Update healthbar
+ 	self.health = math.min(self.health, self.maxHealth) -- Limit to max health
 	self.healthBarVisual:update(dt)
 end
 
@@ -105,8 +107,8 @@ function Player:shoot()
 		local x, y = self:getXCenter() - (self.shotSize * self.shotScale / 2), self.y - 10
 		local orientation = 0
 		local affectEnemy, affectPlayer = true, false
-		local shot = Projectile.new(x, y, orientation, self.shotScale, self.shotScale, self.shotSize, self.shotSize,
-			self.shotDamage, affectEnemy, affectPlayer)
+		local shot = Projectile.new(x, y, orientation, self.shotScale, self.shotScale, 
+			self.shotSize, self.shotSize, self.shotDamage, affectEnemy, affectPlayer)
 		shot.ySpeed = -6000
 		table.insert(self.level.playerProjectileTable, shot)
 	end
