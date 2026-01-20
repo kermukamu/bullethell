@@ -297,13 +297,22 @@ function Level:updateTables(dt)
 end
 
 function Level:spawnPowerUp()
+	-- Select power up type
+	local powerUpType = ""
+	local randomNum = math.random(1, 2)
+	if randomNum == 1 then
+		powerUpType = "Total annihilation"
+	elseif randomNum == 2 then
+		powerUpType = "Health"
+	end
+
 	local spawnX = math.random(150, love.graphics.getWidth() - 150)
 	local spawnY = math.random(150, love.graphics.getHeight() - 150)
 	local powerUpOrientation = 0
 	local powerUpScale = 0.5
 	local powerUpSize = 32
 	table.insert(self.powerUpTable, PowerUp.new(spawnX, spawnY, powerUpOrientation, 
-		powerUpScale, powerUpScale, powerUpSize, powerUpSize, self))
+		powerUpScale, powerUpScale, powerUpSize, powerUpSize, powerUpType, self))
 	self.powerUpTimer = self.powerUpInterval
 end
 
