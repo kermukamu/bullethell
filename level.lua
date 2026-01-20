@@ -44,7 +44,7 @@ function Level.new(debugmode, host)
 	self.spawnTimer = 0
 
 	-- Power up
-	self.powerUpInterval = 5
+	self.powerUpInterval = 20
 	self.powerUpTimer = self.powerUpInterval
 	self.powerUpTextCenterX = love.graphics.getWidth()/2
 	self.powerUpTextY = love.graphics.getHeight() - 100
