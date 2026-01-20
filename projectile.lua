@@ -22,16 +22,24 @@ function Projectile.new(x, y, r, sx, sy, w, h, damage, affectEnemy, affectPlayer
 	self.damage = damage or 0
 	self.affectEnemy = affectEnemy or false
 	self.affectPlayer = affectPlayer or false
+	self.beingAnnihilated = false
+	self.annihilationRate = 2
 
 	-- Other
 	self.health = 1
 	self.cShift = 0
+	self.opaque = 1
 	return self
 end
 
 function Projectile:update(dt)
     self:posUpdate(dt)
     self.cShift = self.cShift + (dt * 0.5)
+
+    if self.beingAnnihilated then
+    	self.opaque = self.opaque - self.annihilationRate * dt
+    	if self.opaque <= 0 then self.health = 0 end
+    end
 end
 
 function Projectile:posUpdate(dt)
@@ -43,15 +51,13 @@ end
 function Projectile:draw()
     if self.affectPlayer then
     	local r, g, b = 1, 0, math.sin(self.cShift)
-    	local opaque = 1
-    	love.graphics.setColor(r, g, b, opaque)
+    	love.graphics.setColor(r, g, b, self.opaque)
     	love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)
     	love.graphics.setColor(1,1,1,1)
     end
     if self.affectEnemy then
        	local r, g, b = math.sin(self.cShift), 1, 0
-    	local opaque = 1
-        love.graphics.setColor(r, g, b, opaque)
+        love.graphics.setColor(r, g, b, self.opaque)
     	love.graphics.rectangle( "fill", self.x, self.y, self.w*self.sx, self.h*self.sx)
     	love.graphics.setColor(1,1,1,1)
     end

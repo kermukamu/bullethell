@@ -32,6 +32,8 @@ function Enemy.new(x, y, r, sx, sy, w, h, instructions, level)
 	self.health = 100
 	self.hurtCooldown = 0
 	self.maxHurtCooldown = 0.2
+	self.beingAnnihilated = false
+	self.annihilationRate = 2
 
 	-- Other
 	self.shotDamage = 25
@@ -44,10 +46,16 @@ end
 
 function Enemy:update(dt)
     self.hurtCooldown = math.max(0, self.hurtCooldown - dt)
+    self.cShift = self.cShift + (dt * 0.5)
     if self.instructions then
     	self.instructions:callInstructions(dt)
     end
     self:posUpdate(dt)
+
+    if self.beingAnnihilated then
+    	self.opaque = self.opaque - self.annihilationRate * dt
+    	if self.opaque <= 0 then self.health = 0 end
+    end
 
     -- Update hurt visual effect
     if self.hurtCooldown > 0 then self.opaque = 1-(self.hurtCooldown/self.maxHurtCooldown) end
@@ -81,6 +89,13 @@ function Enemy:shoot(angleDeg, speed, scale)
 		affectEnemy, affectPlayer)
 	shot.xSpeed = math.sin(math.rad(angleDeg)) * speed --+ self.xSpeedMult * self.xSpeed
 	shot.ySpeed = math.cos(math.rad(angleDeg)) * speed --+ self.ySpeedMult * self.ySpeed
+
+	-- Copy annihilation status to the shot
+	if self.beingAnnihilated then
+		shot.opaque = self.opaque
+		shot.beingAnnihilated = true
+	end
+
 	table.insert(self.level.enemyProjectileTable, shot)
 end
 
