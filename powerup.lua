@@ -68,6 +68,10 @@ function PowerUp:annihilateAll()
     for _, ep in ipairs(self.level.enemyProjectileTable) do
     	ep.beingAnnihilated = true
 	end
+
+	for _, e in ipairs(self.level.enemyTable) do
+    	e.beingAnnihilated = true
+	end
 end
 
 function PowerUp:collidesWith(object)
