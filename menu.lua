@@ -11,6 +11,7 @@ function Menu.new(debugmode, host)
 	self.host = host
 
 	self.buttonTable = {}
+	self.centeredTextTable = {}
 	return self
 end
 
@@ -20,6 +21,10 @@ end
 function Menu:draw()
 	for _, b in ipairs(self.buttonTable) do
 		b:draw()
+	end
+
+	for _, t in ipairs(self.centeredTextTable) do
+		self:printXCenteredText(t.text, t.centerX, t.y, t.scale)
 	end
 end
 
