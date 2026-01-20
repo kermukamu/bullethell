@@ -24,24 +24,25 @@ function Scene:setupMainMenu()
 		io.stdout:flush()
 	end
 	self.stage = Menu.new(self.debugmode, self)
-	
-	-- Draw controls text
-	local controlsText = "WASD to move\nSHIFT for speed\nSPACE to shoot"
-	local controlsTextCenterX = love.graphics.getWidth()/2
-	local controlsTextY = love.graphics.getHeight()/2 - 300
-	local controlsTextScale = 3
-	self.stage:printXCenteredText(controlsText, controlsTextCenterX, controlsTextY, controlsTextScale)
-	
+
 	-- Initialize start button
 	local startButtonText = "Start"
 	local buttonExecuteFunction = function() self:setupLevel() end
 	local startButtonWidth = 500
 	local startButtonHeight = 250
 	local startButtonCenterX = love.graphics.getWidth()/2
-	local startButtonY = love.graphics.getHeight()/2
+	local startButtonY = love.graphics.getHeight()/2 + 100
 	local startButtonScale = 3
 	table.insert(self.stage.buttonTable, Button.new(startButtonText, buttonExecuteFunction, 
 		startButtonWidth, startButtonHeight, startButtonCenterX, startButtonY, startButtonScale))
+
+	-- Controls text
+	local controlsText = {}
+	controlsText.text = "   WASD to move\n   SPACE to shoot\n   SHIFT for speed\nE to use a power up"
+	controlsText.centerX = love.graphics.getWidth()/2
+	controlsText.y = love.graphics.getHeight()/2 - 250
+	controlsText.scale = 3
+	table.insert(self.stage.centeredTextTable, controlsText)	
 end
 
 function Scene:setupLevel()
