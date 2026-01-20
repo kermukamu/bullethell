@@ -5,7 +5,7 @@ Explosion = cexplosion.Explosion
 local PowerUp = {}
 PowerUp.__index = PowerUp
 
-function PowerUp.new(x, y, r, sx, sy, w, h, level)
+function PowerUp.new(x, y, r, sx, sy, w, h, name, level)
 	local self = setmetatable({}, PowerUp)
 	self.level = level
 
@@ -24,7 +24,7 @@ function PowerUp.new(x, y, r, sx, sy, w, h, level)
 	-- Other
 	self.hasBeenPicked = false
 	self.hasBeenUsed = false
-	self.name = "Total annihilation"
+	self.name = name
 	return self
 end
 
@@ -33,6 +33,14 @@ function PowerUp:update(dt)
 
 	if not self.hasBeenPicked and self:collidesWith(self.level.player) 
 		and self.level.activePowerUp == nil then
+
+		-- Health powerup gets used immediately
+		if self.name == "Health" then 
+			self.level.player.health = math.min(self.level.player.health + 25, 
+				self.level.player.maxHealth)
+			self.hasBeenUsed = true
+			return
+		end
 		
 		self.hasBeenPicked = true
 		self.level.activePowerUp = self
