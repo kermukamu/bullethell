@@ -84,7 +84,8 @@ end
 function Instructions:callInstructions(dt)
 	self.wait = math.max(0, self.wait - dt)
 
-	-- Call readInstruction() for every line until receiving false as return
+	-- Call readInstruction() for every line until receiving false as return.
+	-- Receiving false means all instructions for current time have been read
 	local keepReading = true
 	while self.wait <= 0 and keepReading do
 		local instruction = self.instructionList[self.ind]
