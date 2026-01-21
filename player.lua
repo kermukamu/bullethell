@@ -34,7 +34,7 @@ function Player.new(x, y, r, sx, sy, w, h, level)
 	self.hurtCooldown = 0
 
 	-- Shooting
-	self.maxShotCooldown = 0.1
+	self.maxShotCooldown = 0.05
 	self.shotCooldown = 0
 	self.shotDamage = 30
 	self.shotSize = 32
@@ -58,12 +58,16 @@ function Player:update(dt)
     self.shotCooldown = math.max(0, self.shotCooldown - dt)
     self.hurtCooldown = math.max(0, self.hurtCooldown - dt)
 
-    -- Check movement and update position
+    -- Movement update
+    self.prevX = self.x
+    self.prevY = self.y
     self:movement()
     self:posUpdate(dt)
 
-    -- Check if shooting key is pressed
-    if love.keyboard.isDown("space") then self:shoot() end
+    -- Shooting
+    if self.shotCooldown <= 0 and love.keyboard.isDown("space") then 
+    	self:shoot() 
+    end
 
     -- Run collision checks between enemy projectiles and self
     if self.hurtCooldown <= 0 then
@@ -102,16 +106,14 @@ function Player:draw()
 end
 
 function Player:shoot()
-	if (self.shotCooldown <= 0) then
-		self.shotCooldown = self.maxShotCooldown
-		local x, y = self:getXCenter() - (self.shotSize * self.shotScale / 2), self.y - 10
-		local orientation = 0
-		local affectEnemy, affectPlayer = true, false
-		local shot = Projectile.new(x, y, orientation, self.shotScale, self.shotScale, 
-			self.shotSize, self.shotSize, self.shotDamage, affectEnemy, affectPlayer)
-		shot.ySpeed = -6000
-		table.insert(self.level.playerProjectileTable, shot)
-	end
+	self.shotCooldown = self.maxShotCooldown
+	local x, y = self:getXCenter() - (self.shotSize * self.shotScale / 2), self.y - 10
+	local orientation = 0
+	local affectEnemy, affectPlayer = true, false
+	local shot = Projectile.new(x, y - self.shotSize * 2, orientation, self.shotScale, self.shotScale, 
+		self.shotSize, self.shotSize * 5, self.shotDamage, affectEnemy, affectPlayer)
+	shot.ySpeed = -6000
+	table.insert(self.level.playerProjectileTable, shot)
 end
 
 function Player:movement()
