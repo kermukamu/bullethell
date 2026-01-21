@@ -50,6 +50,7 @@ function Level.new(debugmode, host)
 	self.powerUpTextY = love.graphics.getHeight() - 100
 	self.powerUpTextScale = 3
 	self.activePowerUp = nil
+	self.powerUpCount = 0 -- non-picked up power ups
 
 	-- Countdown for the appearing of ending text
 	self.endingTextWait = 2
@@ -100,8 +101,9 @@ function Level:update(dt)
 	self.spawnTimer = self.spawnTimer - dt
 
 	-- Power up spawning
-	if self.powerUpTimer <= 0 then
+	if self.powerUpTimer <= 0 and self.powerUpCount < 1 then
 		self:spawnPowerUp()
+		self.powerUpTimer = self.powerUpInterval
 	end
 	self.powerUpTimer = self.powerUpTimer - dt
 
@@ -127,7 +129,30 @@ function Level:update(dt)
 end
 
 function Level:draw()
-	if (not self.isOver) then
+	for _, ef in ipairs(self.effectsTable) do
+		ef:draw()
+    end
+
+    for _, pUp in ipairs(self.powerUpTable) do
+		pUp:draw()
+		if pUp.hasBeenPicked then
+			self:printXCenteredText("Power up: " .. pUp.name, 
+				self.powerUpTextCenterX, self.powerUpTextY, self.powerUpTextScale)
+		end
+    end
+
+	-- Draw things
+	for _, p in ipairs(self.enemyProjectileTable) do
+		p:draw()
+    end
+    for _, p in ipairs(self.playerProjectileTable) do
+		p:draw()
+    end
+	for _, e in ipairs(self.enemyTable) do
+		e:draw()
+    end
+
+    if (not self.isOver) then
 		self.player:draw()
 
 		if debugmode then
@@ -141,27 +166,6 @@ function Level:draw()
 		local scoreScale = 3
 		self:printXCenteredText(("Score: %.0f"):format(self.score), scoreX, scoreY, scoreScale)
 	end
-
-	-- Draw things
-	for _, p in ipairs(self.enemyProjectileTable) do
-		p:draw()
-    end
-    for _, p in ipairs(self.playerProjectileTable) do
-		p:draw()
-    end
-	for _, e in ipairs(self.enemyTable) do
-		e:draw()
-    end
-    for _, pUp in ipairs(self.powerUpTable) do
-		pUp:draw()
-		if pUp.hasBeenPicked then
-			self:printXCenteredText("Power up: " .. pUp.name, 
-				self.powerUpTextCenterX, self.powerUpTextY, self.powerUpTextScale)
-		end
-    end
-    for _, ef in ipairs(self.effectsTable) do
-		ef:draw()
-    end
 
     -- Ending
     if self.isOver then
@@ -283,6 +287,7 @@ function Level:updateTables(dt)
 		pUp:update(dt)
 		if pUp:shouldDestroy() then
 			table.remove(self.powerUpTable, i)
+			self.powerUpCount = self.powerUpCount - 1
 		end
 	end
 
@@ -309,11 +314,11 @@ function Level:spawnPowerUp()
 	local spawnX = math.random(150, love.graphics.getWidth() - 150)
 	local spawnY = math.random(150, love.graphics.getHeight() - 150)
 	local powerUpOrientation = 0
-	local powerUpScale = 0.5
+	local powerUpScale = 1
 	local powerUpSize = 32
 	table.insert(self.powerUpTable, PowerUp.new(spawnX, spawnY, powerUpOrientation, 
 		powerUpScale, powerUpScale, powerUpSize, powerUpSize, powerUpType, self))
-	self.powerUpTimer = self.powerUpInterval
+	self.powerUpCount = self.powerUpCount + 1
 end
 
 function Level:spawnEffect(effect)
@@ -336,11 +341,15 @@ function Level:mousepressed(mx, my, button)
 end
 
 function Level:keypressed(key)
-  	if self.isOver and key == "return" then 
-  		self.host:setupMainMenu()
-  	elseif key == "e" and self.activePowerUp ~= nil then
-  		self.activePowerUp:execute()
-  		self.activePowerUp = nil
+	if self.isOver then
+  		if key == "return" then 
+  			self.host:setupMainMenu()
+  		end
+  	else
+  		if key == "e" and self.activePowerUp ~= nil then
+  			self.activePowerUp:execute()
+  			self.activePowerUp = nil
+  		end
   	end
 end
 
