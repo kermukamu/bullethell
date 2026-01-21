@@ -2,6 +2,8 @@ local cprojectile = require("projectile")
 Projectile = cprojectile.Projectile
 local cinstructions = require("instructions")
 Instructions = cinstructions.Instructions
+local csquareparticle = require("squareparticle")
+SquareParticle = csquareparticle.SquareParticle
 
 -- Enemy "class"
 local Enemy = {}
@@ -15,6 +17,8 @@ function Enemy.new(x, y, r, sx, sy, w, h, instructions, level)
 	self.x = x or 0
 	self.y = y or 0
 	self.r = r or 0
+	self.originalSX = sx
+	self.originalSY = sy
 	self.sx = sx or 1
 	self.sy = sy or 1
 	self.w = w or 128
@@ -38,7 +42,7 @@ function Enemy.new(x, y, r, sx, sy, w, h, instructions, level)
 	-- Other
 	self.shotDamage = 25
 	self.shotSize = 32
-	self.cShift = 0
+	self.timer = 0
 	self.opaque = 1
 	self.instructions = Instructions.new(instructions, self)
 	return self
@@ -46,7 +50,10 @@ end
 
 function Enemy:update(dt)
     self.hurtCooldown = math.max(0, self.hurtCooldown - dt)
-    self.cShift = self.cShift + (dt * 0.5)
+    self.timer = self.timer + dt
+    self.sx = self.originalSX + math.sin(self.timer) / 4 + math.log(self.hurtCooldown+1)
+    self.sy = self.originalSY + math.sin(self.timer) / 4 + math.log(self.hurtCooldown+1)
+
     if self.instructions then
     	self.instructions:callInstructions(dt)
     end
@@ -68,13 +75,14 @@ function Enemy:update(dt)
 				self.health = self.health - p.damage
 				self.hurtCooldown = self.maxHurtCooldown
 				self.level.score = self.level.score + self.level.enemyHitScore
+				self:hurtEffect() self:hurtEffect() self:hurtEffect()
 			end
     	end
     end
 end
 
 function Enemy:draw()
-	local r, g, b = 1, 0, math.sin(self.cShift)
+	local r, g, b = 1, 0, math.sin(self.timer / 2)
     love.graphics.setColor(r, g, b, self.opaque)
     love.graphics.rectangle( "fill", self.x, self.y, self.w * self.sx, self.h * self.sx)
     love.graphics.setColor(1,1,1,1)
@@ -97,6 +105,21 @@ function Enemy:shoot(angleDeg, speed, scale)
 	end
 
 	table.insert(self.level.enemyProjectileTable, shot)
+end
+
+function Enemy:hurtEffect()
+	-- Square particle effect
+	local size, shrinkSpeed = math.random(5, 20), math.random(8, 12)
+	local r, g, b, o = 1, 0, math.sin(self.timer / 2), self.opaque -- Current color of enemy
+	local sqrX = self:getXCenter()
+	local sqrY = self:getYCenter()
+	local mode = "fill"
+	local sPrt = SquareParticle.new(sqrX, sqrY, 
+		size, shrinkSpeed, r, g, b, o, mode, self.level)
+	sPrt.xSpeed = math.random(-50, 50)
+	sPrt.ySpeed = math.random(-50, 50)
+	sPrt:centerToPos()
+	self.level:spawnEffect(sPrt)
 end
 
 function Enemy:getXCenter()
@@ -139,7 +162,10 @@ end
 
 function Enemy:shouldDestroy()
 	-- 0 HP
-	if self.health <= 0 then return true end
+	if self.health <= 0 then
+		for i = 1, 20, 1 do	self:hurtEffect() end
+		return true 
+	end
 
 	-- Off-scene
 	local wScene = love.graphics.getWidth()
