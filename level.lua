@@ -33,6 +33,7 @@ function Level.new(debugmode, host)
 	self.playerProjectileTable = {}
 	self.powerUpTable = {}
 	self.effectsTable = {}
+	self.notificationTable = {}
 
 	-- General timer
 	self.timer = 0
@@ -200,6 +201,10 @@ function Level:draw()
     		self:printXCenteredText(returnMenuText, returnMenuTextCenterX, returnMenuTextY, returnMenuTextScale)
     	end
 	end
+
+	for _, n in ipairs(self.notificationTable) do
+		n:draw()
+    end
 end
 
 function Level:spawnEnemies()
@@ -307,6 +312,15 @@ function Level:updateTables(dt)
 			table.remove(self.effectsTable, i)
 		end
 	end
+
+	-- Update notifications
+	for i =#self.notificationTable, 1, -1 do
+		local n = self.notificationTable[i]
+		n:update(dt)
+		if n:shouldDestroy() then
+			table.remove(self.notificationTable, i)
+		end
+	end
 end
 
 function Level:spawnPowerUp()
@@ -327,6 +341,10 @@ function Level:spawnPowerUp()
 	table.insert(self.powerUpTable, PowerUp.new(spawnX, spawnY, powerUpOrientation, 
 		powerUpScale, powerUpScale, powerUpSize, powerUpSize, powerUpType, self))
 	self.powerUpCount = self.powerUpCount + 1
+end
+
+function Level:spawnNotification(notification)
+	table.insert(self.notificationTable, notification)
 end
 
 function Level:spawnEffect(effect)
