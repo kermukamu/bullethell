@@ -1,5 +1,7 @@
 local cexplosion = require("explosion")
 Explosion = cexplosion.Explosion
+local cnotification = require("notification")
+Notification = cnotification.Notification
 
 -- power up "class"
 local PowerUp = {}
@@ -39,10 +41,10 @@ function PowerUp:update(dt)
 			for i=1, 20, 1 do self:pickupEffect() end
 
 			-- Health powerup gets used immediately unlike others
-			if self.name == "Health" then 
-				self.level.player.health = math.min(self.level.player.health + 25, 
-					self.level.player.maxHealth)
+			if self.name == "Health" then
+				self.hasBeenPicked = true
 				self.hasBeenUsed = true
+				self:healthPickUp()
 				return
 			end
 
@@ -68,6 +70,27 @@ function PowerUp:execute()
 	self.hasBeenUsed = true
 end
 
+function PowerUp:healthPickUp()
+	local notification = nil
+	if self.level.player.health >= self.level.player.maxHealth then
+		local r, g, b, o = 1, 0.2, 0, 1
+		local lifeTime = 1
+		local scale = 3
+		notification = Notification.new("Already max health!", self:getXCenter(), self:getYCenter(), 
+			scale, lifeTime, r, g, b, o, self.level)
+		notification.ySpeed = -50
+	else
+		self.level.player.health = math.min(self.level.player.health + 25, 
+			self.level.player.maxHealth)
+		local r, g, b, o = 0, 1, 0, 1
+		local lifeTime = 1
+		local scale = 3
+		notification = Notification.new("Picked up health!", self:getXCenter(), self:getYCenter(), 
+			scale, lifeTime, r, g, b, o, self.level)
+		notification.ySpeed = -50
+	end
+	self.level:spawnNotification(notification)
+end
 
 function PowerUp:explosionEffect()
 	local radius, speed = 4000, 2500
