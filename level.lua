@@ -49,8 +49,11 @@ function Level.new(debugmode, host)
 	self.powerUpTextCenterX = love.graphics.getWidth()/2
 	self.powerUpTextY = love.graphics.getHeight() - 100
 	self.powerUpTextScale = 3
-	self.activePowerUp = nil
 	self.powerUpCount = 0 -- non-picked up power ups
+	self.powerUpSpawnXMin, self.powerUpSpawnXMax = 150, love.graphics.getWidth() - 150
+	self.powerUpSpawnYMin, self.powerUpSpawnYMax = 750, love.graphics.getHeight() - 150
+	self.powerUpCountMax = 5
+	self.activePowerUp = nil
 
 	-- Countdown for the appearing of ending text
 	self.endingTextWait = 2
@@ -82,6 +85,11 @@ function Level.new(debugmode, host)
 		io.stdout:flush()
 	end
 
+	-- Play music
+	gSounds.music:setLooping(true)
+	gSounds.music:setVolume(0.2)
+	gSounds.music:play()
+
 	return self
 end
 
@@ -101,7 +109,7 @@ function Level:update(dt)
 	self.spawnTimer = self.spawnTimer - dt
 
 	-- Power up spawning
-	if self.powerUpTimer <= 0 and self.powerUpCount < 1 then
+	if self.powerUpTimer <= 0 and self.powerUpCount < self.powerUpCountMax then
 		self:spawnPowerUp()
 		self.powerUpTimer = self.powerUpInterval
 	end
@@ -311,8 +319,8 @@ function Level:spawnPowerUp()
 		powerUpType = "Health"
 	end
 
-	local spawnX = math.random(150, love.graphics.getWidth() - 150)
-	local spawnY = math.random(150, love.graphics.getHeight() - 150)
+	local spawnX = math.random(self.powerUpSpawnXMin, self.powerUpSpawnXMax)
+	local spawnY = math.random(self.powerUpSpawnYMin, self.powerUpSpawnYMax)
 	local powerUpOrientation = 0
 	local powerUpScale = 1
 	local powerUpSize = 32

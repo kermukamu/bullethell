@@ -76,6 +76,12 @@ function Enemy:update(dt)
 				self.hurtCooldown = self.maxHurtCooldown
 				self.level.score = self.level.score + self.level.enemyHitScore
 				self:hurtEffect() self:hurtEffect() self:hurtEffect()
+
+				-- Play random sound
+				local randI = math.random(#gSounds.enemyHit)
+				local sound = gSounds.enemyHit[randI]:clone()
+				sound:setVolume(0.7)
+				sound:play()
 			end
     	end
     end

@@ -114,6 +114,13 @@ function Player:shoot()
 		self.shotSize, self.shotSize * 5, self.shotDamage, affectEnemy, affectPlayer)
 	shot.ySpeed = -6000
 	table.insert(self.level.playerProjectileTable, shot)
+
+	-- Play sound
+	--local sound1 = gSounds.playerShoot1:clone()
+	local sound2 = gSounds.playerShoot2:clone()
+	sound2:setVolume(0.2)
+	--sound1:play()
+	sound2:play()
 end
 
 function Player:movement()
